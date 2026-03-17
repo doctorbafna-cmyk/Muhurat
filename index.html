@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Untitled</title>
+    
+
+  </head>
+    
+  <body>
+  <!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Universal Muhurat Calculator</title>
+<link rel="apple-touch-icon" href="https://i.ibb.co/tpY6PWKg/shubh-labh.png">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+font-family:Arial;
+font-size:18px;
+max-width:720px;
+margin:auto;
+padding:10px;
+background:#fafafa;
+}
+
+h2{text-align:center;}
+
+input,button{
+padding:12px;
+margin:6px 0;
+width:100%;
+font-size:17px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+background:#ff8c00;
+color:white;
+font-weight:bold;
+border:none;
+}
+
+table{
+border-collapse:collapse;
+width:100%;
+margin-top:15px;
+background:white;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:8px;
+text-align:center;
+}
+
+th{background:#f0f0f0;}
+
+.best{color:green;font-weight:bold;}
+
+.bad{color:red;font-weight:bold;}
+
+.current{background:#e8f2ff;font-weight:bold;}
+
+.bestBox{
+margin-top:20px;
+padding:15px;
+border:3px solid green;
+font-size:20px;
+font-weight:bold;
+color:green;
+text-align:center;
+background:#f7fff7;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Universal Muhurat Calculator</h2>
+
+<input id="city" placeholder="Enter City Name">
+
+<input id="date" type="date">
+
+<button onclick="calculate()">Calculate</button>
+
+<button onclick="toggleFestivals()">Show / Hide Festival Calendar</button>
+
+<div id="festivalBox" style="display:none;"></div>
+
+<div id="output"></div>
+
+<script>
+
+/* AUTO DATE */
+
+let d=new Date()
+
+let today=
+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")
+
+document.getElementById("date").value=today
+
+
+/* AUTO LOCATION */
+
+
+
+/* -------------------------
+   FESTIVALS
+--------------------------*/
+const festivals = {
+"2026-01-14":"Makara Sankranti",
+"2026-03-04":"Holi",
+"2026-03-20":"Ugadi / Navratri",
+"2026-03-27":"Rama Navami",
+"2026-03-31":"Mahavir Jayanti",
+"2026-04-14":"Tamil New Year",
+"2026-04-20":"Akshay Tritiya",
+"2026-08-15":"Independence Day",
+"2026-08-28":"Raksha Bandhan",
+"2026-09-08":"Paryushan Prarambh",
+"2026-09-14":"Ganesh Chaturthi",
+"2026-09-15":"Samvatsari",
+"2026-10-11":"Navratri",
+"2026-10-20":"Dussehra",
+"2026-11-06":"Dhanteras",
+"2026-11-08":"Diwali",
+"2026-12-25":"Christmas"
+};
+
+
+function toggleFestivals(){
+
+let box=document.getElementById("festivalBox")
+
+if(box.style.display==="none"){
+
+let html="<h3>Festival Calendar</h3><table>"
+
+html+="<tr><th>Date</th><th>Festival</th></tr>"
+
+Object.keys(festivals).forEach(d=>{
+html+="<tr><td>"+d+"</td><td>"+festivals[d]+"</td></tr>"
+})
+
+html+="</table>"
+
+box.innerHTML=html
+box.style.display="block"
+
+}else{
+
+box.style.display="none"
+
+}
+
+}
+
+
+/* GEOCODE */
+
+async function geocode(city){
+
+let url=`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`
+
+let res=await fetch(url)
+
+let data=await res.json()
+
+return{
+lat:data[0].lat,
+lon:data[0].lon,
+display:data[0].display_name
+}
+
+}
+
+
+/* SUNRISE SUNSET */
+
+async function getSunTimes(lat,lon,date){
+
+let sunUrl=`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lon}&date=${date}&formatted=0`
+
+let sunRes=await fetch(sunUrl)
+
+let sunData=await sunRes.json()
+
+let sunrise=new Date(sunData.results.sunrise)
+let sunset=new Date(sunData.results.sunset)
+
+return{
+sunrise:sunrise.getHours()*60+sunrise.getMinutes(),
+sunset:sunset.getHours()*60+sunset.getMinutes()
+}
+
+}
+
+
+/* UTIL */
+
+function format(min){
+
+let h=Math.floor(min/60)%24
+let m=Math.round(min%60)
+if(m==60){
+h=h+1
+m=0
+}
+
+return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")
+}
+
+function divide(start,end){
+
+let dur=end-start
+let part=dur/8
+
+let arr=[]
+
+for(let i=0;i<8;i++){
+
+arr.push([start+i*part,start+(i+1)*part])
+
+}
+
+return arr
+}
+
+function inPeriod(t,s,e){
+
+return t>=s&&t<e
+
+}
+
+
+/* -------------------------
+   CHOGHADIYA
+--------------------------*/
+const cycle=["Amrit","Char","Rog","Kaal","Labh","Udveg","Shubh"];
+
+const dayNames={
+0:["Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg"],
+1:["Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit"],
+2:["Rog","Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog"],
+3:["Labh","Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh"],
+4:["Shubh","Rog","Udveg","Char","Labh","Amrit","Kaal","Shubh"],
+5:["Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg","Char"],
+6:["Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit","Kaal"]
+};
+
+function nightFromDay(daySeq){
+
+let last=daySeq[7];
+
+let idx=cycle.indexOf(last);
+
+let start=(idx+1+7)%7;
+
+let night=[];
+
+for(let i=0;i<8;i++){
+
+night.push(cycle[(start+i)%7]);
+
+}
+
+return night;
+
+}
+
+
+/* -------------------------
+   DOSHAS
+--------------------------*/
+const rahuIndex=[7,1,6,4,5,3,2];
+const yamaIndex=[4,3,2,1,0,6,5];
+const kaalVelaIndex={0:4,1:1,2:5,3:2,4:6,5:3,6:0};
+const vaarVelaIndex={0:3,1:6,2:1,3:4,4:7,5:2,6:5};
+const kaalRatriIndex={1:3,2:1,3:6,4:4,5:2,6:0,0:5};
+
+function periodFromIndex(start,end,index){
+let part=(end-start)/8;
+return [start+part*index,start+part*(index+1)];
+}
+
+/* -------------------------
+   QUALITY
+--------------------------*/
+function quality(name,start,rahu,yama,kaalVela,vaarVela,kaalRatri){
+
+let issues=[];
+
+if(inPeriod(start,rahu[0],rahu[1])) issues.push("RAHU");
+if(inPeriod(start,yama[0],yama[1])) issues.push("YAMA");
+if(inPeriod(start,kaalVela[0],kaalVela[1])) issues.push("Kaal Vela");
+if(inPeriod(start,vaarVela[0],vaarVela[1])) issues.push("Vaar Vela");
+if(inPeriod(start,kaalRatri[0],kaalRatri[1])) issues.push("Kaal Ratri");
+
+if(issues.length>0) return issues.join(" / ");
+
+if(name==="Amrit"||name==="Shubh"||name==="Labh") return "BEST";
+if(name==="Char") return "GOOD";
+return "INAUSPICIOUS";
+}
+
+
+/* -------------------------
+   MAIN
+--------------------------*/
+async function calculate(){
+
+let city=document.getElementById("city").value;
+let date=document.getElementById("date").value;
+
+let loc=await geocode(city);
+let today=await getSunTimes(loc.lat,loc.lon,date);
+
+let next=new Date(date);
+next.setDate(next.getDate()+1);
+let nextStr=next.toISOString().split("T")[0];
+let tomorrow=await getSunTimes(loc.lat,loc.lon,nextStr);
+
+let weekday=new Date(date).getDay();
+
+let daySegments=divide(today.sunrise,today.sunset);
+let nightSegments=divide(today.sunset,tomorrow.sunrise + 1440);
+
+let daySeq=dayNames[weekday];
+let nightSeq=nightFromDay(daySeq);
+
+let rahu=periodFromIndex(today.sunrise,today.sunset,rahuIndex[weekday]);
+let yama=periodFromIndex(today.sunrise,today.sunset,yamaIndex[weekday]);
+let kaalVela=periodFromIndex(today.sunrise,today.sunset,kaalVelaIndex[weekday]);
+let vaarVela=periodFromIndex(today.sunrise,today.sunset,vaarVelaIndex[weekday]);
+let kaalRatri=nightSegments[kaalRatriIndex[weekday]];
+
+let html=`<h3>${loc.display}</h3>`;
+let dayName=new Date(date).toLocaleDateString('en-IN',{weekday:'long'});
+html+=`<div style="font-size:20px; font-weight:bold;">${date} (${dayName})</div>`;
+if(festivals[date]){
+
+html+=`<div style="
+font-size:22px;
+font-weight:bold;
+color:green;
+text-transform:uppercase;
+margin-top:5px;
+">
+
+${festivals[date]}
+
+</div>`;
+
+}
+html+=`Sunrise: ${format(today.sunrise)} | Sunset: ${format(today.sunset)}<br>`;
+html+=`Rahu: ${format(rahu[0])}-${format(rahu[1])} |
+Yama: ${format(yama[0])}-${format(yama[1])} |
+Kaal Vela: ${format(kaalVela[0])}-${format(kaalVela[1])} |
+Vaar Vela: ${format(vaarVela[0])}-${format(vaarVela[1])} |
+Kaal Ratri: ${format(kaalRatri[0])}-${format(kaalRatri[1])}`;
+
+
+/* ================================
+BEST MUHURAT TODAY
+================================ */
+
+let bestList=[];
+
+for(let i=0;i<8;i++){
+
+let seg=daySegments[i]
+let name=daySeq[i]
+
+let good=(name==="Amrit"||name==="Shubh"||name==="Labh")
+
+if(!good) continue
+
+let bad=false
+
+let badTimes=[rahu,yama,kaalVela,vaarVela]
+
+for(let b of badTimes){
+
+if(!(seg[1]<=b[0]||seg[0]>=b[1])) bad=true
+
+}
+
+if(!bad){
+
+bestList.push(`${name} ${format(seg[0])}-${format(seg[1])}`)
+
+}
+
+}
+
+html+=`<div style="
+border:2px solid green;
+padding:10px;
+margin-top:10px;
+font-size:18px;
+background:#eaffea">
+
+<b>Best Muhurat Today</b><br>
+${bestList.join("<br>")}
+
+</div>`
+
+
+/* ================================
+CURRENT MUHURAT
+================================ */
+
+let t=new Date()
+let now=t.getHours()*60+t.getMinutes()
+
+if(now < today.sunrise) now += 1440
+
+let current=""
+
+/* CHECK DAY */
+
+for(let i=0;i<8;i++){
+
+let seg=daySegments[i]
+
+if(now>=seg[0] && now<seg[1]){
+
+let q = quality(daySeq[i],seg[0],rahu,yama,kaalVela,vaarVela,kaalRatri)
+
+let color = (q=="BEST") ? "green" : "red";
+
+current=`${daySeq[i]} ${format(seg[0])}-${format(seg[1])} (<span style="color:${color}">${q}</span>)`
+
+}
+
+}
+
+/* CHECK NIGHT */
+
+if(current==""){
+
+for(let i=0;i<8;i++){
+
+let seg=nightSegments[i]
+
+if(now>=seg[0] && now<seg[1]){
+
+let q = quality(nightSeq[i],seg[0],rahu,yama,kaalVela,vaarVela,kaalRatri)
+
+let color = (q=="BEST") ? "green" : "red";
+
+current=`${nightSeq[i]} ${format(seg[0])}-${format(seg[1])} (<span style="color:${color}">${q}</span>)`
+
+}
+
+}
+
+}
+
+html+=`<div style="
+border:2px solid blue;
+padding:10px;
+margin-top:10px;
+font-size:18px;
+background:#eef4ff">
+
+<b>Current Muhurat Now</b><br>
+${current}
+
+</div>`
+
+function render(title,segments,names){
+html+=`<h3>${title}</h3><table>`;
+html+=`<tr><th>No</th><th>Start</th><th>End</th><th>Choghadiya</th><th>Quality</th></tr>`;
+
+segments.forEach((seg,i)=>{
+let q=quality(names[i],seg[0],rahu,yama,kaalVela,vaarVela,kaalRatri);
+let color=(q==="BEST")?"green":(q==="GOOD")?"orange":"red";
+
+html+=`<tr>
+<td>${i+1}</td>
+<td>${format(seg[0])}</td>
+<td>${format(seg[1])}</td>
+<td>${names[i]}</td>
+<td style="color:${color}">${q}</td>
+</tr>`;
+});
+
+html+="</table>";
+}
+
+render("Day Choghadiya",daySegments,daySeq);
+render("Night Choghadiya",nightSegments,nightSeq);
+
+document.getElementById("output").innerHTML=html;
+}
+
+async function detectCity(){
+
+if(navigator.geolocation){
+
+navigator.geolocation.getCurrentPosition(async pos=>{
+
+let lat=pos.coords.latitude;
+let lon=pos.coords.longitude;
+
+let r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+let data=await r.json();
+
+let city =
+data.address.city ||
+data.address.town ||
+data.address.county ||
+data.address.state ||
+"Delhi";
+
+document.getElementById("city").value = city;
+
+calculate();
+
+},
+async error=>{
+
+// If GPS fails use IP detection
+let r=await fetch("https://ipapi.co/json/");
+let data=await r.json();
+
+document.getElementById("city").value=data.city;
+
+calculate();
+
+});
+
+}
+
+}
+
+detectCity();
+
+</script>
+</body>
+</html>
+    
+  </body>
+  
+</html>
