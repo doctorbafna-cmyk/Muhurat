@@ -119,6 +119,11 @@ document.getElementById("city").value=city
 
 calculate()
 })
+, ()=>{
+// If location blocked, still run with default city
+document.getElementById("city").value="Chennai";
+calculate();
+}
 
 </script>
 
