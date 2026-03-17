@@ -14,6 +14,8 @@ button{background:#ff8c00;color:white;font-weight:bold;border:none;}
 table{border-collapse:collapse;width:100%;margin-top:15px;background:white;}
 th,td{border:1px solid #ccc;padding:8px;text-align:center;}
 th{background:#f0f0f0;}
+.best{color:green;font-weight:bold;}
+.bad{color:red;font-weight:bold;}
 </style>
 </head>
 
@@ -25,7 +27,9 @@ th{background:#f0f0f0;}
 <input id="date" type="date">
 
 <button onclick="calculate()">Calculate</button>
+<button onclick="toggleFestivals()">Show / Hide Festival Calendar</button>
 
+<div id="festivalBox" style="display:none;"></div>
 <div id="output"></div>
 
 <script>
@@ -34,6 +38,28 @@ th{background:#f0f0f0;}
 let d=new Date()
 let today=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")
 document.getElementById("date").value=today
+
+// FESTIVALS
+const festivals={
+"2026-03-04":"Holi",
+"2026-03-20":"Ugadi / Navratri",
+"2026-03-27":"Rama Navami",
+"2026-11-08":"Diwali"
+};
+
+function toggleFestivals(){
+let box=document.getElementById("festivalBox")
+if(box.style.display==="none"){
+let html="<h3>Festival Calendar</h3>"
+Object.keys(festivals).forEach(d=>{
+html+=d+" : "+festivals[d]+"<br>"
+})
+box.innerHTML=html
+box.style.display="block"
+}else{
+box.style.display="none"
+}
+}
 
 // GEO
 async function geocode(city){
@@ -61,41 +87,25 @@ if(min==60){h++;min=0}
 return String(h).padStart(2,"0")+":"+String(min).padStart(2,"0")
 }
 
-aasync function calculate(){
-
-try{
+async function calculate(){
 
 let city=document.getElementById("city").value
 let date=document.getElementById("date").value
 
-if(!city){
-document.getElementById("output").innerHTML="Enter city"
-return
-}
-
 let loc=await geocode(city)
-
-if(!loc || !loc.lat){
-document.getElementById("output").innerHTML="Location not found"
-return
-}
-
 let sun=await getSun(loc.lat,loc.lon,date)
 
-document.getElementById("output").innerHTML=
-`<h3>${city}</h3>
-Sunrise: ${format(sun.sunrise)}<br>
-Sunset: ${format(sun.sunset)}`
+let html=`<h3>${city}</h3>`
+html+=`Sunrise: ${format(sun.sunrise)} | Sunset: ${format(sun.sunset)}`
 
-}catch(e){
-
-document.getElementById("output").innerHTML="Error loading data"
-
+if(festivals[date]){
+html+=`<div style="color:green;font-weight:bold">${festivals[date]}</div>`
 }
 
+document.getElementById("output").innerHTML=html
 }
 
-// AUTO DETECT
+// AUTO LOCATION
 navigator.geolocation.getCurrentPosition(async pos=>{
 let lat=pos.coords.latitude
 let lon=pos.coords.longitude
@@ -103,7 +113,7 @@ let lon=pos.coords.longitude
 let r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
 let data=await r.json()
 
-let city=data.address.city || data.address.town || data.address.state || "Delhi"
+let city=data.address.city||data.address.town||data.address.state||"Delhi"
 
 document.getElementById("city").value=city
 
