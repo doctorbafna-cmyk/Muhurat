@@ -61,20 +61,38 @@ if(min==60){h++;min=0}
 return String(h).padStart(2,"0")+":"+String(min).padStart(2,"0")
 }
 
-async function calculate(){
+aasync function calculate(){
+
+try{
 
 let city=document.getElementById("city").value
 let date=document.getElementById("date").value
 
-if(!city){alert("Enter city");return}
+if(!city){
+document.getElementById("output").innerHTML="Enter city"
+return
+}
 
 let loc=await geocode(city)
+
+if(!loc || !loc.lat){
+document.getElementById("output").innerHTML="Location not found"
+return
+}
+
 let sun=await getSun(loc.lat,loc.lon,date)
 
 document.getElementById("output").innerHTML=
 `<h3>${city}</h3>
 Sunrise: ${format(sun.sunrise)}<br>
 Sunset: ${format(sun.sunset)}`
+
+}catch(e){
+
+document.getElementById("output").innerHTML="Error loading data"
+
+}
+
 }
 
 // AUTO DETECT
