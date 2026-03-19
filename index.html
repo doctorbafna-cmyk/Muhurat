@@ -33,6 +33,27 @@ th{background:#f0f0f0;}
 /* AUTO DATE */
 document.getElementById("date").value=new Date().toISOString().split("T")[0];
 
+/* FESTIVALS */
+const festivals={
+"2026-01-14":"Makara Sankranti",
+"2026-03-04":"Holi",
+"2026-03-20":"Ugadi / Navratri",
+"2026-03-27":"Rama Navami",
+"2026-03-31":"Mahavir Jayanti",
+"2026-04-14":"Tamil New Year",
+"2026-04-20":"Akshay Tritiya",
+"2026-08-15":"Independence Day",
+"2026-08-28":"Raksha Bandhan",
+"2026-09-08":"Paryushan Prarambh",
+"2026-09-14":"Ganesh Chaturthi",
+"2026-09-15":"Samvatsari",
+"2026-10-11":"Navratri",
+"2026-10-20":"Dussehra",
+"2026-11-06":"Dhanteras",
+"2026-11-08":"Diwali",
+"2026-12-25":"Christmas"
+};
+
 /* GEO */
 async function geocode(city){
 let r=await fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`);
@@ -146,6 +167,11 @@ let kr=nightSeg[krIndex[wd]];
 /* HEADER */
 let html=`<h3>${loc.display}</h3>`;
 html+=`<b style="font-size:20px">${date} (${new Date(date).toLocaleDateString('en-IN',{weekday:'long'})})</b><br>`;
+if(festivals[date]){
+html+=`<div style="color:green;font-weight:bold;font-size:20px">
+${festivals[date]}
+</div>`;
+}
 html+=`Sunrise ${format(sun.sunrise)} | Sunset ${format(sun.sunset)}<br>`;
 html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} | Yama ${format(yama[0])}-${format(yama[1])} | Kaal Vela ${format(kv[0])}-${format(kv[1])} | Vaar Vela ${format(vv[0])}-${format(vv[1])} | Kaal Ratri ${format(kr[0])}-${format(kr[1])}`;
 
