@@ -178,7 +178,11 @@ html+=`<div style="color:green;font-weight:bold;font-size:20px">${festivals[date
 }
 
 html+=`Sunrise ${format(sun.sunrise)} | Sunset ${format(sun.sunset)}<br>`;
-html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} | Yama ${format(yama[0])}-${format(yama[1])}`;
+html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} | 
+Yama ${format(yama[0])}-${format(yama[1])} | 
+Kaal Vela ${format(kv[0])}-${format(kv[1])} | 
+Vaar Vela ${format(vv[0])}-${format(vv[1])} | 
+Kaal Ratri ${format(kr[0])}-${format(kr[1])}`;
 
 /* BEST */
 let best=[];
