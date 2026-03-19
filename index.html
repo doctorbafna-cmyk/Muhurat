@@ -178,6 +178,33 @@ ${festivals[date]}
 html+=`Sunrise ${format(sun.sunrise)} | Sunset ${format(sun.sunset)}<br>`;
 html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} | Yama ${format(yama[0])}-${format(yama[1])} | Kaal Vela ${format(kv[0])}-${format(kv[1])} | Vaar Vela ${format(vv[0])}-${format(vv[1])} | Kaal Ratri ${format(kr[0])}-${format(kr[1])}`;
 
+/* BEST MUHURAT */
+
+let best=[];
+
+daySeg.forEach((s,i)=>{
+
+let name=daySeq[i];
+
+// only good choghadiya
+if(!["Amrit","Shubh","Labh"].includes(name)) return;
+
+// check dosha overlap
+let q=quality(name,s[0],rahu,yama,kv,vv,kr);
+
+// if any dosha present → reject
+if(q!=="BEST") return;
+
+// add valid best muhurat
+best.push(`${name} ${format(s[0])}-${format(s[1])}`);
+
+});
+
+html+=`<div class="box" style="border-color:green;background:#eaffea">
+<b>Best Muhurat Today</b><br>
+${best.length?best.join("<br>"):"No suitable muhurat"}
+</div>`;
+
 /* CURRENT */
 let now=new Date();
 let t=now.getHours()*60+now.getMinutes();
