@@ -25,9 +25,7 @@ th{background:#f0f0f0;}
 <input id="date" type="date">
 
 <button onclick="calculate()">Calculate</button>
-<button onclick="toggleFestivals()">Show / Hide Festival Calendar</button>
 
-<div id="festivalBox" style="display:none;"></div>
 <div id="output"></div>
 
 <script>
@@ -35,48 +33,11 @@ th{background:#f0f0f0;}
 /* AUTO DATE */
 document.getElementById("date").value=new Date().toISOString().split("T")[0];
 
-/* FESTIVALS */
-const festivals={
-"2026-01-14":"Makara Sankranti",
-"2026-03-04":"Holi",
-"2026-03-20":"Ugadi / Navratri",
-"2026-03-27":"Rama Navami",
-"2026-03-31":"Mahavir Jayanti",
-"2026-04-14":"Tamil New Year",
-"2026-04-20":"Akshay Tritiya",
-"2026-08-15":"Independence Day",
-"2026-08-28":"Raksha Bandhan",
-"2026-09-08":"Paryushan Prarambh",
-"2026-09-14":"Ganesh Chaturthi",
-"2026-09-15":"Samvatsari",
-"2026-10-11":"Navratri",
-"2026-10-20":"Dussehra",
-"2026-11-06":"Dhanteras",
-"2026-11-08":"Diwali",
-"2026-12-25":"Christmas"
-};
-
-function toggleFestivals(){
-let box=document.getElementById("festivalBox");
-if(box.style.display==="none"){
-let html="<h3>Festival Calendar</h3><table><tr><th>Date</th><th>Festival</th></tr>";
-Object.keys(festivals).forEach(d=>{
-html+=`<tr><td>${d}</td><td>${festivals[d]}</td></tr>`;
-});
-html+="</table>";
-box.innerHTML=html;
-box.style.display="block";
-}else box.style.display="none";
-}
-
-/* GEOCODE */
+/* GEO */
 async function geocode(city){
-try{
 let r=await fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`);
 let d=await r.json();
-if(!d || d.length==0){alert("City not found");return null;}
 return {lat:parseFloat(d[0].lat),lon:parseFloat(d[0].lon),display:d[0].display_name};
-}catch(e){alert("Error fetching location");return null;}
 }
 
 /* SUN */
@@ -137,29 +98,32 @@ return [s+p*i,s+p*(i+1)];
 
 /* QUALITY */
 function quality(name,start,rahu,yama,kv,vv,kr){
+if(inP(start,rahu[0],rahu[1])) return "RAHU";
+if(inP(start,yama[0],yama[1])) return "YAMA";
+if(inP(start,kv[0],kv[1])) return "Kaal Vela";
+if(inP(start,vv[0],vv[1])) return "Vaar Vela";
+if(inP(start,kr[0],kr[1])) return "Kaal Ratri";
 
-if(inP(start,rahu[0],rahu[1])) return '<span style="color:red;font-weight:bold">RAHU</span>';
-if(inP(start,yama[0],yama[1])) return '<span style="color:red;font-weight:bold">YAMA</span>';
-if(inP(start,kv[0],kv[1])) return '<span style="color:red;font-weight:bold">Kaal Vela</span>';
-if(inP(start,vv[0],vv[1])) return '<span style="color:red;font-weight:bold">Vaar Vela</span>';
-if(inP(start,kr[0],kr[1])) return '<span style="color:red;font-weight:bold">Kaal Ratri</span>';
-
-if(["Amrit","Shubh","Labh"].includes(name)) return '<span style="color:green;font-weight:bold">BEST</span>';
-if(name==="Char") return '<span style="color:orange;font-weight:bold">GOOD</span>';
-
-return '<span style="color:red;font-weight:bold">Inauspicious</span>';
+if(["Amrit","Shubh","Labh"].includes(name)) return "BEST";
+if(name==="Char") return "GOOD";
+return "Inauspicious";
 }
+
+/* COLOR */
+function colorText(q){
+if(q==="BEST") return '<span style="color:green;font-weight:bold">BEST</span>';
+if(q==="GOOD") return '<span style="color:orange;font-weight:bold">GOOD</span>';
+return '<span style="color:red;font-weight:bold">'+q+'</span>';
+}
+
 /* MAIN */
 async function calculate(){
 
 let city=document.getElementById("city").value;
 let date=document.getElementById("date").value;
-
 if(!city){alert("Enter city");return;}
 
 let loc=await geocode(city);
-if(!loc) return;
-
 let sun=await getSun(loc.lat,loc.lon,date);
 
 let next=new Date(date);
@@ -182,9 +146,6 @@ let kr=nightSeg[krIndex[wd]];
 /* HEADER */
 let html=`<h3>${loc.display}</h3>`;
 html+=`<b style="font-size:20px">${date} (${new Date(date).toLocaleDateString('en-IN',{weekday:'long'})})</b><br>`;
-
-if(festivals[date]) html+=`<b>${festivals[date]}</b><br>`;
-
 html+=`Sunrise ${format(sun.sunrise)} | Sunset ${format(sun.sunset)}<br>`;
 html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} | Yama ${format(yama[0])}-${format(yama[1])} | Kaal Vela ${format(kv[0])}-${format(kv[1])} | Vaar Vela ${format(vv[0])}-${format(vv[1])} | Kaal Ratri ${format(kr[0])}-${format(kr[1])}`;
 
@@ -198,7 +159,6 @@ daySeg.forEach((s,i)=>{
 if(t>=s[0]&&t<s[1]){
 cur=daySeq[i];
 curQ=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
-let rawQ = curQ;
 curTime=`${format(s[0])}-${format(s[1])}`;
 }
 });
@@ -215,23 +175,22 @@ curTime=`${format(s[0])}-${format(s[1])}`;
 
 html+=`<div class="box" style="border-color:blue;background:#eef4ff">
 <b>Current Muhurat</b><br>
-${cur} ${curTime} 
-<span style="color:${getColor(curQ)};font-weight:bold">${curQ}</span>
+${cur} ${curTime} ${colorText(curQ)}
 </div>`;
 
-/* DAY TABLE */
+/* DAY */
 html+="<h3>Day Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
 daySeg.forEach((s,i)=>{
 let q=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
-html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${daySeq[i]}</td><td style="color:${getColor(q)};font-weight:bold">${q}</td></tr>`;
+html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${daySeq[i]}</td><td>${colorText(q)}</td></tr>`;
 });
 html+="</table>";
 
-/* NIGHT TABLE */
+/* NIGHT */
 html+="<h3>Night Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
 nightSeg.forEach((s,i)=>{
 let q=quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr);
-html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${nightSeq[i]}</td><td style="color:${getColor(q)};font-weight:bold">${q}</td></tr>`;
+html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${nightSeq[i]}</td><td>${colorText(q)}</td></tr>`;
 });
 html+="</table>";
 
