@@ -1,66 +1,21 @@
+
 <!DOCTYPE html>
 <html>
-
 <head>
-<link rel="icon" href="icon.png">
-<link rel="apple-touch-icon" href="icon.png">
 <meta charset="UTF-8">
 <title>Universal Muhurat Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body{
-font-family:Arial;
-font-size:18px;
-max-width:720px;
-margin:auto;
-padding:10px;
-background:#fafafa;
-}
+body{font-family:Arial;font-size:18px;max-width:720px;margin:auto;padding:10px;background:#fafafa;}
 h2{text-align:center;}
-input,button{
-padding:12px;
-margin:6px 0;
-width:100%;
-font-size:17px;
-border-radius:6px;
-border:1px solid #ccc;
-}
-button{
-background:#ff8c00;
-color:white;
-font-weight:bold;
-border:none;
-}
-table{
-border-collapse:collapse;
-width:100%;
-margin-top:15px;
-background:white;
-}
-th,td{
-border:1px solid #ccc;
-padding:8px;
-text-align:center;
-}
+input,button{padding:12px;margin:6px 0;width:100%;font-size:17px;border-radius:6px;border:1px solid #ccc;}
+button{background:#ff8c00;color:white;font-weight:bold;border:none;}
+table{border-collapse:collapse;width:100%;margin-top:15px;background:white;}
+th,td{border:1px solid #ccc;padding:8px;text-align:center;}
 th{background:#f0f0f0;}
-
-.green{color:green;font-weight:bold;}
-.red{color:red;font-weight:bold;}
-
-.bestBox{
-margin-top:15px;
-padding:12px;
-border:2px solid green;
-background:#eaffea;
-}
-
-.currentBox{
-margin-top:15px;
-padding:12px;
-border:2px solid blue;
-background:#eef4ff;
-}
+.box{margin-top:15px;padding:12px;border:2px solid;}
+.bad{color:red;font-weight:bold;}
 </style>
 </head>
 
@@ -80,12 +35,11 @@ background:#eef4ff;
 <script>
 
 /* AUTO DATE */
-let d=new Date();
-document.getElementById("date").value=d.toISOString().split("T")[0];
+document.getElementById("date").value=new Date().toISOString().split("T")[0];
 
-/* FESTIVALS */
+/* FESTIVALS — FULL LIST */
 const festivals={
-"2026-01-14":"Makar Sankranti",
+"2026-01-14":"Makara Sankranti",
 "2026-03-04":"Holi",
 "2026-03-20":"Ugadi / Navratri",
 "2026-03-27":"Rama Navami",
@@ -94,16 +48,15 @@ const festivals={
 "2026-04-20":"Akshay Tritiya",
 "2026-08-15":"Independence Day",
 "2026-08-28":"Raksha Bandhan",
-"2026-09-08":"Paryushan Prarmbh",
+"2026-09-08":"Paryushan Prarambh",
 "2026-09-14":"Ganesh Chaturthi",
 "2026-09-15":"Samvatsari",
 "2026-10-11":"Navratri",
 "2026-10-20":"Dussehra",
-"2026-11-06":"Dhan Teras",
-"2026-11-08":"Deepavali",
+"2026-11-06":"Dhanteras",
+"2026-11-08":"Diwali",
 "2026-12-25":"Christmas"
 };
-
 
 function toggleFestivals(){
 let box=document.getElementById("festivalBox");
@@ -115,7 +68,9 @@ html+=`<tr><td>${d}</td><td>${festivals[d]}</td></tr>`;
 html+="</table>";
 box.innerHTML=html;
 box.style.display="block";
-}else box.style.display="none";
+}else{
+box.style.display="none";
+}
 }
 
 /* GEO */
@@ -171,9 +126,6 @@ return n;
 /* DOSHAS */
 const rahuIndex=[7,1,6,4,5,3,2];
 const yamaIndex=[4,3,2,1,0,6,5];
-const kaalVelaIndex={0:4,1:1,2:5,3:2,4:6,5:3,6:0};
-const vaarVelaIndex={0:3,1:6,2:1,3:4,4:7,5:2,6:5};
-const kaalRatriIndex={0:5,1:3,2:1,3:6,4:4,5:2,6:0};
 
 function period(s,e,i){
 let p=(e-s)/8;
@@ -181,19 +133,11 @@ return [s+p*i,s+p*(i+1)];
 }
 
 /* QUALITY */
-function quality(name,start,rahu,yama,kv,vv,kr){
-
-// 🔴 CHECK DOSHAS FIRST (OVERRIDE)
+function quality(name,start,rahu,yama){
 if(inP(start,rahu[0],rahu[1])) return "RAHU";
 if(inP(start,yama[0],yama[1])) return "YAMA";
-if(inP(start,kv[0],kv[1])) return "Kaal Vela";
-if(inP(start,vv[0],vv[1])) return "Vaar Vela";
-if(inP(start,kr[0],kr[1])) return "Kaal Ratri";
-
-// 🟢 NORMAL CHOGHADIYA
-if(name==="Amrit" || name==="Shubh" || name==="Labh") return "BEST";
+if(["Amrit","Shubh","Labh"].includes(name)) return "BEST";
 if(name==="Char") return "GOOD";
-
 return "Inauspicious";
 }
 
@@ -219,85 +163,59 @@ let nightSeq=nightFromDay(daySeq);
 
 let rahu=period(sun.sunrise,sun.sunset,rahuIndex[wd]);
 let yama=period(sun.sunrise,sun.sunset,yamaIndex[wd]);
-let kv=period(sun.sunrise,sun.sunset,kaalVelaIndex[wd]);
-let vv=period(sun.sunrise,sun.sunset,vaarVelaIndex[wd]);
-let kr=nightSeg[kaalRatriIndex[wd]];
 
 let html=`<h3>${loc.display}</h3>`;
-html+=`<div style="font-size:20px;font-weight:bold;">
-${date} (${new Date(date).toLocaleDateString('en-IN',{weekday:'long'})})
-</div>`;
-if(festivals[date]) html+=`<b>${festivals[date]}</b><br>`;
+html+=`<div style="font-size:22px;font-weight:bold">${date} (${new Date(date).toLocaleDateString('en-IN',{weekday:'long'})})</div>`;
+
+if(festivals[date]){
+html+=`<div style="color:green;font-weight:bold;font-size:20px">${festivals[date]}</div>`;
+}
+
 html+=`Sunrise ${format(sun.sunrise)} | Sunset ${format(sun.sunset)}<br>`;
-html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} |
-Yama ${format(yama[0])}-${format(yama[1])} |
-Kaal Vela ${format(kv[0])}-${format(kv[1])} |
-Vaar Vela ${format(vv[0])}-${format(vv[1])} |
-Kaal Ratri ${format(kr[0])}-${format(kr[1])}`;
+html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} | Yama ${format(yama[0])}-${format(yama[1])}`;
 
 /* BEST */
 let best=[];
 daySeg.forEach((s,i)=>{
-let q=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
-if(q.includes("BEST")){
-best.push(`<span class="green">${daySeq[i]} ${format(s[0])}-${format(s[1])}</span>`);
-}
+let n=daySeq[i];
+if(["Amrit","Shubh","Labh"].includes(n) && !inP(s[0],rahu[0],rahu[1])) best.push(`${n} ${format(s[0])}-${format(s[1])}`);
 });
-html+=`<div class="bestBox"><b>Best Muhurat</b><br>${best.join("<br>")}</div>`;
+html+=`<div class="box" style="border-color:green;background:#eaffea"><b>Best Muhurat</b><br>${best.join("<br>")}</div>`;
 
 /* CURRENT */
-/* ================================
-   CURRENT MUHURAT
-================================ */
+let now=new Date();
+let t=now.getHours()*60+now.getMinutes();
+let cur="",curQ="";
 
-let now = new Date();
-let t = now.getHours()*60 + now.getMinutes();
-
-let cur = "";
-let curQuality = "";
-
-/* CHECK DAY */
-for(let i=0;i<8;i++){
-let s = daySeg[i];
-
-if(t>=s[0] && t<s[1]){
-cur = `${daySeq[i]} ${format(s[0])}-${format(s[1])}`;
-curQuality = quality(daySeq[i], s[0], rahu, yama, kv, vv, kr);
-}
-}
-
-/* CHECK NIGHT */
-if(cur===""){
-for(let i=0;i<8;i++){
-let s = nightSeg[i];
-
-if(t>=s[0] && t<s[1]){
-cur = `${nightSeq[i]} ${format(s[0])}-${format(s[1])}`;
-curQuality = quality(nightSeq[i], s[0], rahu, yama, kv, vv, kr);
-}
-}
-}
-
-/* DISPLAY */
-html+=`
-<div class="box" style="border-color:blue;background:#eef4ff">
-<b>Current Muhurat</b><br>
-${cur}<br>
-<span style="color:red;font-weight:bold">${curQuality}</span>
-</div>`;
-/* DAY TABLE */
-html+="<h3>Day Choghadiya</h3>";
-html+="<table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
 daySeg.forEach((s,i)=>{
-html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${daySeq[i]}</td><td>${quality(daySeq[i],s[0],rahu,yama,kv,vv,kr)}</td></tr>`;
+if(t>=s[0]&&t<s[1]){
+cur=`${daySeq[i]} ${format(s[0])}-${format(s[1])}`;
+curQ=quality(daySeq[i],s[0],rahu,yama);
+}
+});
+
+if(cur===""){
+nightSeg.forEach((s,i)=>{
+if(t>=s[0]&&t<s[1]){
+cur=`${nightSeq[i]} ${format(s[0])}-${format(s[1])}`;
+curQ=quality(nightSeq[i],s[0],rahu,yama);
+}
+});
+}
+
+html+=`<div class="box" style="border-color:blue;background:#eef4ff"><b>Current Muhurat</b><br>${cur}<br><span class="bad">${curQ}</span></div>`;
+
+/* DAY TABLE */
+html+="<h3>Day Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
+daySeg.forEach((s,i)=>{
+html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${daySeq[i]}</td><td>${quality(daySeq[i],s[0],rahu,yama)}</td></tr>`;
 });
 html+="</table>";
 
 /* NIGHT TABLE */
-html+="<h3>Night Choghadiya</h3>";
-html+="<table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
+html+="<h3>Night Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
 nightSeg.forEach((s,i)=>{
-html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${nightSeq[i]}</td><td>${quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr)}</td></tr>`;
+html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${nightSeq[i]}</td><td>${quality(nightSeq[i],s[0],rahu,yama)}</td></tr>`;
 });
 html+="</table>";
 
@@ -308,10 +226,14 @@ document.getElementById("output").innerHTML=html;
 navigator.geolocation.getCurrentPosition(async pos=>{
 let r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
 let d=await r.json();
-document.getElementById("city").value=d.address.city||d.address.town||d.address.state||"Chennai";
+document.getElementById("city").value=d.address.city||d.address.town||d.address.state||"Delhi";
 calculate();
 });
 
 </script>
 </body>
 </html>
+
+
+
+
