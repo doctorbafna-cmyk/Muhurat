@@ -246,39 +246,45 @@ best.push(`<span class="green">${daySeq[i]} ${format(s[0])}-${format(s[1])}</spa
 html+=`<div class="bestBox"><b>Best Muhurat</b><br>${best.join("<br>")}</div>`;
 
 /* CURRENT */
-let now=new Date();
-let t=now.getHours()*60+now.getMinutes();
+/* ================================
+   CURRENT MUHURAT
+================================ */
 
-let cur="";
-let curQuality="";
-let curTime="";
+let now = new Date();
+let t = now.getHours()*60 + now.getMinutes();
 
-// DAY
-daySeg.forEach((s,i)=>{
+let cur = "";
+let curQuality = "";
+
+/* CHECK DAY */
+for(let i=0;i<8;i++){
+let s = daySeg[i];
+
 if(t>=s[0] && t<s[1]){
-cur = daySeq[i];
-curTime = `${format(s[0])}-${format(s[1])}`;
-curQuality = quality(daySeq[i],s[0],rahu,yama,kv,vv,kr)
+cur = `${daySeq[i]} ${format(s[0])}-${format(s[1])}`;
+curQuality = quality(daySeq[i], s[0], rahu, yama, kv, vv, kr);
 }
-});
+}
 
-// NIGHT
+/* CHECK NIGHT */
 if(cur===""){
-nightSeg.forEach((s,i)=>{
+for(let i=0;i<8;i++){
+let s = nightSeg[i];
+
 if(t>=s[0] && t<s[1]){
-cur = nightSeq[i];
-curTime = `${format(s[0])}-${format(s[1])}`;
-curQuality = quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr)
-});
+cur = `${nightSeq[i]} ${format(s[0])}-${format(s[1])}`;
+curQuality = quality(nightSeq[i], s[0], rahu, yama, kv, vv, kr);
+}
+}
 }
 
-let color = (curQuality==="BEST") ? "green" : (curQuality==="GOOD" ? "orange" : "red");
-
-html+=`<div class="box" style="border-color:blue;background:#eef4ff">
+/* DISPLAY */
+html+=`
+<div class="box" style="border-color:blue;background:#eef4ff">
 <b>Current Muhurat</b><br>
-${cur} ${curTime} (<span style="color:${color};font-weight:bold">${curQuality}</span>)
+${cur}<br>
+<span style="color:red;font-weight:bold">${curQuality}</span>
 </div>`;
-
 /* DAY TABLE */
 html+="<h3>Day Choghadiya</h3>";
 html+="<table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
