@@ -28,8 +28,8 @@ th{background:#f0f0f0;}
 
 <button onclick="toggleFestivals()">Show / Hide Festival Calendar</button>
 <div id="festivalBox" style="display:none;"></div>
-<
-  div id="output"></div>
+
+<div id="output"></div>
 
 <script>
 
@@ -237,6 +237,28 @@ document.getElementById("city").value="Chennai";
 calculate();
 });
 
+function toggleFestivals(){
+
+let box=document.getElementById("festivalBox");
+
+if(box.style.display==="none"){
+
+let html="<h3>Festival Calendar</h3><table>";
+html+="<tr><th>Date</th><th>Festival</th></tr>";
+
+Object.keys(festivals).forEach(d=>{
+html+=`<tr><td>${d}</td><td>${festivals[d]}</td></tr>`;
+});
+
+html+="</table>";
+
+box.innerHTML=html;
+box.style.display="block";
+
+}else{
+box.style.display="none";
+}
+}
 </script>
 </body>
 </html>
