@@ -14,8 +14,6 @@ table{border-collapse:collapse;width:100%;margin-top:15px;background:white;}
 th,td{border:1px solid #ccc;padding:8px;text-align:center;}
 th{background:#f0f0f0;}
 .box{margin-top:15px;padding:12px;border:2px solid;}
-.best{color:green;font-weight:bold;}
-.bad{color:red;font-weight:bold;}
 </style>
 </head>
 
@@ -76,34 +74,18 @@ async function geocode(city){
 try{
 let r=await fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`);
 let d=await r.json();
-
-if(!d || d.length==0){
-alert("City not found");
-return null;
+if(!d || d.length==0){alert("City not found");return null;}
+return {lat:parseFloat(d[0].lat),lon:parseFloat(d[0].lon),display:d[0].display_name};
+}catch(e){alert("Error fetching location");return null;}
 }
 
-return {
-lat:parseFloat(d[0].lat),
-lon:parseFloat(d[0].lon),
-display:d[0].display_name
-};
-
-}catch(e){
-alert("Error fetching location");
-return null;
-}
-}
-
-/* SUN TIMES */
+/* SUN */
 async function getSun(lat,lon,date){
 let r=await fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lon}&date=${date}&formatted=0`);
 let d=await r.json();
 let sr=new Date(d.results.sunrise);
 let ss=new Date(d.results.sunset);
-return {
-sunrise:sr.getHours()*60+sr.getMinutes(),
-sunset:ss.getHours()*60+ss.getMinutes()
-};
+return {sunrise:sr.getHours()*60+sr.getMinutes(), sunset:ss.getHours()*60+ss.getMinutes()};
 }
 
 function format(m){
@@ -167,6 +149,12 @@ if(name==="Char") return "GOOD";
 return "Inauspicious";
 }
 
+function getColor(q){
+if(q==="BEST") return "green";
+if(q==="GOOD") return "orange";
+return "red";
+}
+
 /* MAIN */
 async function calculate(){
 
@@ -206,7 +194,7 @@ if(festivals[date]) html+=`<b>${festivals[date]}</b><br>`;
 html+=`Sunrise ${format(sun.sunrise)} | Sunset ${format(sun.sunset)}<br>`;
 html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} | Yama ${format(yama[0])}-${format(yama[1])} | Kaal Vela ${format(kv[0])}-${format(kv[1])} | Vaar Vela ${format(vv[0])}-${format(vv[1])} | Kaal Ratri ${format(kr[0])}-${format(kr[1])}`;
 
-/* CURRENT MUHURAT */
+/* CURRENT */
 let now=new Date();
 let t=now.getHours()*60+now.getMinutes();
 
@@ -231,13 +219,16 @@ curTime=`${format(s[0])}-${format(s[1])}`;
 }
 
 html+=`<div class="box" style="border-color:blue;background:#eef4ff">
-<b>Current Muhurat</b><br>${cur} ${curTime} <span class="bad"><span style="color:${getColor(curQ)};font-weight:bold">${curQ}</span></span></div>`;
+<b>Current Muhurat</b><br>
+${cur} ${curTime} 
+<span style="color:${getColor(curQ)};font-weight:bold">${curQ}</span>
+</div>`;
 
 /* DAY TABLE */
 html+="<h3>Day Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
 daySeg.forEach((s,i)=>{
 let q=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
-html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${daySeq[i]}</td><td>${q}</td></tr>`;
+html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${daySeq[i]}</td><td style="color:${getColor(q)};font-weight:bold">${q}</td></tr>`;
 });
 html+="</table>";
 
@@ -245,38 +236,23 @@ html+="</table>";
 html+="<h3>Night Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
 nightSeg.forEach((s,i)=>{
 let q=quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr);
-html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${nightSeq[i]}</td><td>${q}</td></tr>`;
+html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${nightSeq[i]}</td><td style="color:${getColor(q)};font-weight:bold">${q}</td></tr>`;
 });
 html+="</table>";
 
 document.getElementById("output").innerHTML=html;
 }
 
-/* AUTO CITY WITH FALLBACK */
-async function detectCity(){
-
-try{
+/* AUTO CITY */
 navigator.geolocation.getCurrentPosition(async pos=>{
-
 let r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
 let d=await r.json();
-
-document.getElementById("city").value =
-d.address.city || d.address.town || d.address.state || "Chennai";
-
+document.getElementById("city").value=d.address.city||d.address.town||d.address.state||"Chennai";
 calculate();
-
 },()=>{
 document.getElementById("city").value="Chennai";
 calculate();
 });
-}catch(e){
-document.getElementById("city").value="Chennai";
-}
-
-}
-
-detectCity();
 
 </script>
 </body>
