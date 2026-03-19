@@ -13,9 +13,9 @@ button{background:#ff8c00;color:white;font-weight:bold;border:none;}
 table{border-collapse:collapse;width:100%;margin-top:15px;background:white;}
 th,td{border:1px solid #ccc;padding:8px;text-align:center;}
 th{background:#f0f0f0;}
+.box{margin-top:15px;padding:12px;border:2px solid;}
 .best{color:green;font-weight:bold;}
 .bad{color:red;font-weight:bold;}
-.box{margin-top:15px;padding:12px;border:2px solid;}
 </style>
 </head>
 
@@ -71,20 +71,39 @@ box.style.display="block";
 }else box.style.display="none";
 }
 
-/* GEO */
+/* GEOCODE */
 async function geocode(city){
+try{
 let r=await fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`);
 let d=await r.json();
-return {lat:d[0].lat,lon:d[0].lon,display:d[0].display_name};
+
+if(!d || d.length==0){
+alert("City not found");
+return null;
 }
 
-/* SUN */
+return {
+lat:parseFloat(d[0].lat),
+lon:parseFloat(d[0].lon),
+display:d[0].display_name
+};
+
+}catch(e){
+alert("Error fetching location");
+return null;
+}
+}
+
+/* SUN TIMES */
 async function getSun(lat,lon,date){
 let r=await fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lon}&date=${date}&formatted=0`);
 let d=await r.json();
 let sr=new Date(d.results.sunrise);
 let ss=new Date(d.results.sunset);
-return {sunrise:sr.getHours()*60+sr.getMinutes(), sunset:ss.getHours()*60+ss.getMinutes()};
+return {
+sunrise:sr.getHours()*60+sr.getMinutes(),
+sunset:ss.getHours()*60+ss.getMinutes()
+};
 }
 
 function format(m){
@@ -104,6 +123,7 @@ function inP(t,s,e){return t>=s&&t<e;}
 
 /* CHOGHADIYA */
 const cycle=["Amrit","Char","Rog","Kaal","Labh","Udveg","Shubh"];
+
 const dayNames={
 0:["Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg"],
 1:["Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit"],
@@ -135,6 +155,7 @@ return [s+p*i,s+p*(i+1)];
 
 /* QUALITY */
 function quality(name,start,rahu,yama,kv,vv,kr){
+
 if(inP(start,rahu[0],rahu[1])) return "RAHU";
 if(inP(start,yama[0],yama[1])) return "YAMA";
 if(inP(start,kv[0],kv[1])) return "Kaal Vela";
@@ -151,12 +172,16 @@ async function calculate(){
 
 let city=document.getElementById("city").value;
 let date=document.getElementById("date").value;
+
 if(!city){alert("Enter city");return;}
 
 let loc=await geocode(city);
+if(!loc) return;
+
 let sun=await getSun(loc.lat,loc.lon,date);
 
-let next=new Date(date); next.setDate(next.getDate()+1);
+let next=new Date(date);
+next.setDate(next.getDate()+1);
 let sun2=await getSun(loc.lat,loc.lon,next.toISOString().split("T")[0]);
 
 let daySeg=divide(sun.sunrise,sun.sunset);
@@ -172,15 +197,19 @@ let kv=period(sun.sunrise,sun.sunset,kvIndex[wd]);
 let vv=period(sun.sunrise,sun.sunset,vvIndex[wd]);
 let kr=nightSeg[krIndex[wd]];
 
+/* HEADER */
 let html=`<h3>${loc.display}</h3>`;
 html+=`<b style="font-size:20px">${date} (${new Date(date).toLocaleDateString('en-IN',{weekday:'long'})})</b><br>`;
+
 if(festivals[date]) html+=`<b>${festivals[date]}</b><br>`;
+
 html+=`Sunrise ${format(sun.sunrise)} | Sunset ${format(sun.sunset)}<br>`;
 html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} | Yama ${format(yama[0])}-${format(yama[1])} | Kaal Vela ${format(kv[0])}-${format(kv[1])} | Vaar Vela ${format(vv[0])}-${format(vv[1])} | Kaal Ratri ${format(kr[0])}-${format(kr[1])}`;
 
-/* CURRENT */
+/* CURRENT MUHURAT */
 let now=new Date();
 let t=now.getHours()*60+now.getMinutes();
+
 let cur="",curQ="",curTime="";
 
 daySeg.forEach((s,i)=>{
@@ -204,16 +233,50 @@ curTime=`${format(s[0])}-${format(s[1])}`;
 html+=`<div class="box" style="border-color:blue;background:#eef4ff">
 <b>Current Muhurat</b><br>${cur} ${curTime} <span class="bad">${curQ}</span></div>`;
 
+/* DAY TABLE */
+html+="<h3>Day Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
+daySeg.forEach((s,i)=>{
+let q=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
+html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${daySeq[i]}</td><td>${q}</td></tr>`;
+});
+html+="</table>";
+
+/* NIGHT TABLE */
+html+="<h3>Night Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
+nightSeg.forEach((s,i)=>{
+let q=quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr);
+html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${nightSeq[i]}</td><td>${q}</td></tr>`;
+});
+html+="</table>";
+
 document.getElementById("output").innerHTML=html;
 }
 
-/* AUTO CITY */
+/* AUTO CITY WITH FALLBACK */
+async function detectCity(){
+
+try{
 navigator.geolocation.getCurrentPosition(async pos=>{
+
 let r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
 let d=await r.json();
-document.getElementById("city").value=d.address.city||d.address.town||d.address.state||"Delhi";
+
+document.getElementById("city").value =
+d.address.city || d.address.town || d.address.state || "Chennai";
+
+calculate();
+
+},()=>{
+document.getElementById("city").value="Chennai";
 calculate();
 });
+}catch(e){
+document.getElementById("city").value="Chennai";
+}
+
+}
+
+detectCity();
 
 </script>
 </body>
