@@ -138,23 +138,17 @@ return [s+p*i,s+p*(i+1)];
 /* QUALITY */
 function quality(name,start,rahu,yama,kv,vv,kr){
 
-if(inP(start,rahu[0],rahu[1])) return "RAHU";
-if(inP(start,yama[0],yama[1])) return "YAMA";
-if(inP(start,kv[0],kv[1])) return "Kaal Vela";
-if(inP(start,vv[0],vv[1])) return "Vaar Vela";
-if(inP(start,kr[0],kr[1])) return "Kaal Ratri";
+if(inP(start,rahu[0],rahu[1])) return '<span style="color:red;font-weight:bold">RAHU</span>';
+if(inP(start,yama[0],yama[1])) return '<span style="color:red;font-weight:bold">YAMA</span>';
+if(inP(start,kv[0],kv[1])) return '<span style="color:red;font-weight:bold">Kaal Vela</span>';
+if(inP(start,vv[0],vv[1])) return '<span style="color:red;font-weight:bold">Vaar Vela</span>';
+if(inP(start,kr[0],kr[1])) return '<span style="color:red;font-weight:bold">Kaal Ratri</span>';
 
-if(["Amrit","Shubh","Labh"].includes(name)) return "BEST";
-if(name==="Char") return "GOOD";
-return "Inauspicious";
+if(["Amrit","Shubh","Labh"].includes(name)) return '<span style="color:green;font-weight:bold">BEST</span>';
+if(name==="Char") return '<span style="color:orange;font-weight:bold">GOOD</span>';
+
+return '<span style="color:red;font-weight:bold">Inauspicious</span>';
 }
-
-function getColor(q){
-if(q==="BEST") return "green";
-if(q==="GOOD") return "orange";
-return "red";
-}
-
 /* MAIN */
 async function calculate(){
 
