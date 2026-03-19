@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,8 +13,9 @@ button{background:#ff8c00;color:white;font-weight:bold;border:none;}
 table{border-collapse:collapse;width:100%;margin-top:15px;background:white;}
 th,td{border:1px solid #ccc;padding:8px;text-align:center;}
 th{background:#f0f0f0;}
-.box{margin-top:15px;padding:12px;border:2px solid;}
+.best{color:green;font-weight:bold;}
 .bad{color:red;font-weight:bold;}
+.box{margin-top:15px;padding:12px;border:2px solid;}
 </style>
 </head>
 
@@ -37,7 +37,7 @@ th{background:#f0f0f0;}
 /* AUTO DATE */
 document.getElementById("date").value=new Date().toISOString().split("T")[0];
 
-/* FESTIVALS — FULL LIST */
+/* FESTIVALS */
 const festivals={
 "2026-01-14":"Makara Sankranti",
 "2026-03-04":"Holi",
@@ -68,9 +68,7 @@ html+=`<tr><td>${d}</td><td>${festivals[d]}</td></tr>`;
 html+="</table>";
 box.innerHTML=html;
 box.style.display="block";
-}else{
-box.style.display="none";
-}
+}else box.style.display="none";
 }
 
 /* GEO */
@@ -126,9 +124,9 @@ return n;
 /* DOSHAS */
 const rahuIndex=[7,1,6,4,5,3,2];
 const yamaIndex=[4,3,2,1,0,6,5];
-const kaalVelaIndex={0:4,1:1,2:5,3:2,4:6,5:3,6:0};
-const vaarVelaIndex={0:3,1:6,2:1,3:4,4:7,5:2,6:5};
-const kaalRatriIndex={0:5,1:3,2:1,3:6,4:4,5:2,6:0};
+const kvIndex={0:4,1:1,2:5,3:2,4:6,5:3,6:0};
+const vvIndex={0:3,1:6,2:1,3:4,4:7,5:2,6:5};
+const krIndex={0:5,1:3,2:1,3:6,4:4,5:2,6:0};
 
 function period(s,e,i){
 let p=(e-s)/8;
@@ -137,19 +135,12 @@ return [s+p*i,s+p*(i+1)];
 
 /* QUALITY */
 function quality(name,start,rahu,yama,kv,vv,kr){
-
 if(inP(start,rahu[0],rahu[1])) return "RAHU";
 if(inP(start,yama[0],yama[1])) return "YAMA";
 if(inP(start,kv[0],kv[1])) return "Kaal Vela";
 if(inP(start,vv[0],vv[1])) return "Vaar Vela";
 if(inP(start,kr[0],kr[1])) return "Kaal Ratri";
 
-if(["Amrit","Shubh","Labh"].includes(name)) return "BEST";
-if(name==="Char") return "GOOD";
-return "Inauspicious";
-}
-if(inP(start,rahu[0],rahu[1])) return "RAHU";
-if(inP(start,yama[0],yama[1])) return "YAMA";
 if(["Amrit","Shubh","Labh"].includes(name)) return "BEST";
 if(name==="Char") return "GOOD";
 return "Inauspicious";
@@ -177,68 +168,41 @@ let nightSeq=nightFromDay(daySeq);
 
 let rahu=period(sun.sunrise,sun.sunset,rahuIndex[wd]);
 let yama=period(sun.sunrise,sun.sunset,yamaIndex[wd]);
-let kv=period(sun.sunrise,sun.sunset,kaalVelaIndex[wd]);
-let vv=period(sun.sunrise,sun.sunset,vaarVelaIndex[wd]);
-let kr=nightSeg[kaalRatriIndex[wd]];
+let kv=period(sun.sunrise,sun.sunset,kvIndex[wd]);
+let vv=period(sun.sunrise,sun.sunset,vvIndex[wd]);
+let kr=nightSeg[krIndex[wd]];
 
 let html=`<h3>${loc.display}</h3>`;
-html+=`<div style="font-size:22px;font-weight:bold">${date} (${new Date(date).toLocaleDateString('en-IN',{weekday:'long'})})</div>`;
-
-if(festivals[date]){
-html+=`<div style="color:green;font-weight:bold;font-size:20px">${festivals[date]}</div>`;
-}
-
+html+=`<b style="font-size:20px">${date} (${new Date(date).toLocaleDateString('en-IN',{weekday:'long'})})</b><br>`;
+if(festivals[date]) html+=`<b>${festivals[date]}</b><br>`;
 html+=`Sunrise ${format(sun.sunrise)} | Sunset ${format(sun.sunset)}<br>`;
-html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} | 
-Yama ${format(yama[0])}-${format(yama[1])} | 
-Kaal Vela ${format(kv[0])}-${format(kv[1])} | 
-Vaar Vela ${format(vv[0])}-${format(vv[1])} | 
-Kaal Ratri ${format(kr[0])}-${format(kr[1])}`;
-
-/* BEST */
-let best=[];
-daySeg.forEach((s,i)=>{
-let n=daySeq[i];
-if(["Amrit","Shubh","Labh"].includes(n) && !inP(s[0],rahu[0],rahu[1])) best.push(`${n} ${format(s[0])}-${format(s[1])}`);
-});
-html+=`<div class="box" style="border-color:green;background:#eaffea"><b>Best Muhurat</b><br>${best.join("<br>")}</div>`;
+html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} | Yama ${format(yama[0])}-${format(yama[1])} | Kaal Vela ${format(kv[0])}-${format(kv[1])} | Vaar Vela ${format(vv[0])}-${format(vv[1])} | Kaal Ratri ${format(kr[0])}-${format(kr[1])}`;
 
 /* CURRENT */
 let now=new Date();
 let t=now.getHours()*60+now.getMinutes();
-let cur="",curQ="";
+let cur="",curQ="",curTime="";
 
 daySeg.forEach((s,i)=>{
 if(t>=s[0]&&t<s[1]){
-cur=`${daySeq[i]} ${format(s[0])}-${format(s[1])}`;
-curQ = quality(daySeq[i],s[0],rahu,yama,kv,vv,kr)
+cur=daySeq[i];
+curQ=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
+curTime=`${format(s[0])}-${format(s[1])}`;
 }
 });
 
-if(cur===""){
+if(!cur){
 nightSeg.forEach((s,i)=>{
 if(t>=s[0]&&t<s[1]){
-cur=`${nightSeq[i]} ${format(s[0])}-${format(s[1])}`;
-curQ = quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr)
+cur=nightSeq[i];
+curQ=quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr);
+curTime=`${format(s[0])}-${format(s[1])}`;
 }
 });
 }
 
-html+=`<div class="box" style="border-color:blue;background:#eef4ff"><b>Current Muhurat</b><br>${cur}<br><span class="bad">${curQ}</span></div>`;
-
-/* DAY TABLE */
-html+="<h3>Day Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
-daySeg.forEach((s,i)=>{
-html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${daySeq[i]}</td><td>${quality(daySeq[i],s[0],rahu,yama)}</td></tr>`;
-});
-html+="</table>";
-
-/* NIGHT TABLE */
-html+="<h3>Night Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
-nightSeg.forEach((s,i)=>{
-html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${nightSeq[i]}</td><td>${quality(nightSeq[i],s[0],rahu,yama)}</td></tr>`;
-});
-html+="</table>";
+html+=`<div class="box" style="border-color:blue;background:#eef4ff">
+<b>Current Muhurat</b><br>${cur} ${curTime} <span class="bad">${curQ}</span></div>`;
 
 document.getElementById("output").innerHTML=html;
 }
@@ -254,7 +218,3 @@ calculate();
 </script>
 </body>
 </html>
-
-
-
-
