@@ -198,6 +198,7 @@ daySeg.forEach((s,i)=>{
 if(t>=s[0]&&t<s[1]){
 cur=daySeq[i];
 curQ=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
+let rawQ = curQ;
 curTime=`${format(s[0])}-${format(s[1])}`;
 }
 });
