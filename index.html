@@ -166,6 +166,9 @@ let nightSeq=nightFromDay(daySeq);
 
 let rahu=period(sun.sunrise,sun.sunset,rahuIndex[wd]);
 let yama=period(sun.sunrise,sun.sunset,yamaIndex[wd]);
+let kv=period(sun.sunrise,sun.sunset,kaalVelaIndex[wd]);
+let vv=period(sun.sunrise,sun.sunset,vaarVelaIndex[wd]);
+let kr=nightSeg[kaalRatriIndex[wd]];
 
 let html=`<h3>${loc.display}</h3>`;
 html+=`<div style="font-size:22px;font-weight:bold">${date} (${new Date(date).toLocaleDateString('en-IN',{weekday:'long'})})</div>`;
