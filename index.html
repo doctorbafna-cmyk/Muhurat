@@ -246,13 +246,37 @@ html+=`<div class="bestBox"><b>Best Muhurat</b><br>${best.join("<br>")}</div>`;
 /* CURRENT */
 let now=new Date();
 let t=now.getHours()*60+now.getMinutes();
+
 let cur="";
+let curQuality="";
+let curTime="";
+
+// DAY
 daySeg.forEach((s,i)=>{
-if(t>=s[0]&&t<s[1]){
-cur=`${daySeq[i]} (${format(s[0])}-${format(s[1])})`;
+if(t>=s[0] && t<s[1]){
+cur = daySeq[i];
+curTime = `${format(s[0])}-${format(s[1])}`;
+curQuality = quality(daySeq[i],s[0],rahu,yama);
 }
 });
-html+=`<div class="currentBox"><b>Current Muhurat</b><br>${cur}</div>`;
+
+// NIGHT
+if(cur===""){
+nightSeg.forEach((s,i)=>{
+if(t>=s[0] && t<s[1]){
+cur = nightSeq[i];
+curTime = `${format(s[0])}-${format(s[1])}`;
+curQuality = quality(nightSeq[i],s[0],rahu,yama);
+}
+});
+}
+
+let color = (curQuality==="BEST") ? "green" : (curQuality==="GOOD" ? "orange" : "red");
+
+html+=`<div class="box" style="border-color:blue;background:#eef4ff">
+<b>Current Muhurat</b><br>
+${cur} ${curTime} (<span style="color:${color};font-weight:bold">${curQuality}</span>)
+</div>`;
 
 /* DAY TABLE */
 html+="<h3>Day Choghadiya</h3>";
