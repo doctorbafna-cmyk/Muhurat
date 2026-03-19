@@ -231,7 +231,7 @@ curTime=`${format(s[0])}-${format(s[1])}`;
 }
 
 html+=`<div class="box" style="border-color:blue;background:#eef4ff">
-<b>Current Muhurat</b><br>${cur} ${curTime} <span class="bad">${curQ}</span></div>`;
+<b>Current Muhurat</b><br>${cur} ${curTime} <span class="bad"><span style="color:${getColor(curQ)};font-weight:bold">${curQ}</span></span></div>`;
 
 /* DAY TABLE */
 html+="<h3>Day Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
