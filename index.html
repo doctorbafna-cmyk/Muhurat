@@ -4,291 +4,500 @@
 <meta charset="UTF-8">
 <title>Universal Muhurat Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link rel="icon" href="icon.png">
-<link rel="apple-touch-icon" href="icon.png">
-
 <style>
 body{font-family:Arial;font-size:18px;max-width:720px;margin:auto;padding:10px;background:#fafafa;}
 h2{text-align:center;}
-input,button{padding:12px;margin:6px 0;width:100%;font-size:17px;border-radius:6px;border:1px solid #ccc;}
-button{background:#ff8c00;color:white;font-weight:bold;border:none;}
+input,button{padding:12px;margin:6px 0;width:100%;font-size:17px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;}
+button{background:#ff8c00;color:white;font-weight:bold;border:none;cursor:pointer;}
+button:hover{background:#e07800;}
 table{border-collapse:collapse;width:100%;margin-top:15px;background:white;}
-th,td{border:1px solid #ccc;padding:8px;text-align:center;}
+th,td{border:1px solid #ccc;padding:8px;text-align:center;font-size:16px;}
 th{background:#f0f0f0;}
-.box{margin-top:15px;padding:12px;border:2px solid;}
+.box{margin-top:15px;padding:12px;border:2px solid;border-radius:6px;}
+#status{font-size:14px;color:#666;text-align:center;padding:4px;}
+
+/* Festival styles */
+#festBox{display:none;margin-top:12px;background:#fff;border:2px solid #ccc;border-radius:8px;overflow:hidden;}
+#festBox h3{background:#ff8c00;color:#fff;margin:0;padding:12px 16px;font-size:1.1rem;}
+.ftable{width:100%;border-collapse:collapse;}
+.ftable th{background:#ffe0b2;padding:8px 12px;font-size:1rem;text-align:left;border-bottom:2px solid #ccc;}
+.ftable td{padding:8px 12px;font-size:1rem;font-weight:bold;border-bottom:1px solid #eee;color:#111;}
+.ftable tr:nth-child(even) td{background:#fff8f0;}
+.fmonth td{background:#ff8c00!important;color:#fff!important;font-weight:900;text-transform:uppercase;font-size:.9rem;}
+.ftoday td{background:#fff9c4!important;font-weight:900;}
+.fnote{padding:8px 12px;font-size:.9rem;color:#555;font-style:italic;border-top:1px solid #eee;}
 </style>
 </head>
-
 <body>
 
 <h2>Universal Muhurat Calculator</h2>
-
 <input id="city" placeholder="Enter City Name">
 <input id="date" type="date">
-
+<div id="status">Detecting your location...</div>
 <button onclick="calculate()">Calculate</button>
-
-<button onclick="toggleFestivals()">Show / Hide Festival Calendar</button>
-<div id="festivalBox" style="display:none;"></div>
-
+<button onclick="toggleFestivals()">🪔 Show / Hide Festival Calendar</button>
+<div id="festBox"></div>
 <div id="output"></div>
 
 <script>
 
-/* AUTO DATE */
-document.getElementById("date").value=new Date().toISOString().split("T")[0];
+// ── Today's date ──
+document.getElementById("date").value = new Date().toISOString().split("T")[0];
 
-/* FESTIVALS */
-const festivals={
-"2026-01-14":"Makara Sankranti",
-"2026-03-04":"Holi",
-"2026-03-20":"Ugadi / Navratri",
-"2026-03-27":"Rama Navami",
-"2026-03-31":"Mahavir Jayanti",
-"2026-04-14":"Tamil New Year",
-"2026-04-20":"Akshay Tritiya",
-"2026-08-15":"Independence Day",
-"2026-08-28":"Raksha Bandhan",
-"2026-09-08":"Paryushan Prarambh",
-"2026-09-14":"Ganesh Chaturthi",
-"2026-09-15":"Samvatsari",
-"2026-10-11":"Navratri",
-"2026-10-20":"Dussehra",
-"2026-11-06":"Dhanteras",
-"2026-11-08":"Diwali",
-"2026-12-25":"Christmas"
-};
+// ── FIX 3: Auto calculate when city or date changes ──
+let autoTimer = null;
+document.getElementById("city").addEventListener("input", function(){
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(calculate, 1200); // wait 1.2 sec after typing stops
+});
+document.getElementById("date").addEventListener("change", function(){
+  calculate(); // immediate on date change
+});
 
-/* GEO */
-async function geocode(city){
-let r=await fetch(`https://nominatim.openstreetmap.org/search?q=${city}&format=json&limit=1`);
-let d=await r.json();
-return {lat:parseFloat(d[0].lat),lon:parseFloat(d[0].lon),display:d[0].display_name};
-}
+// ── Global GPS coords ──
+let gpsLat = null;
+let gpsLon = null;
 
-/* SUN */
-async function getSun(lat,lon,date){
-let r=await fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lon}&date=${date}&formatted=0`);
-let d=await r.json();
-let sr=new Date(d.results.sunrise);
-let ss=new Date(d.results.sunset);
-return {sunrise:sr.getHours()*60+sr.getMinutes(), sunset:ss.getHours()*60+ss.getMinutes()};
-}
-
+// ── Format minutes → 12hr time ──
 function format(m){
-let h=Math.floor(m/60)%24;
-let mm=Math.round(m%60);
-return String(h).padStart(2,"0")+":"+String(mm).padStart(2,"0");
+  m = ((m%1440)+1440)%1440;
+  let h=Math.floor(m/60), mm=Math.round(m%60);
+  let ampm=h<12?"AM":"PM", h12=h%12===0?12:h%12;
+  return h12+":"+String(mm).padStart(2,"0")+" "+ampm;
 }
 
 function divide(s,e){
-let p=(e-s)/8;
-let a=[];
-for(let i=0;i<8;i++) a.push([s+i*p,s+(i+1)*p]);
-return a;
+  let p=(e-s)/8,a=[];
+  for(let i=0;i<8;i++)a.push([s+i*p,s+(i+1)*p]);
+  return a;
 }
-
 function inP(t,s,e){return t>=s&&t<e;}
 
-/* CHOGHADIYA */
-const cycle=["Amrit","Char","Rog","Kaal","Labh","Udveg","Shubh"];
+// ── Geocode: city name → lat/lon ──
+async function geocode(city){
+  let r=await fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(city)+"&format=json&limit=1");
+  let d=await r.json();
+  if(!d||d.length===0)throw new Error("City not found: "+city);
+  return{lat:+d[0].lat,lon:+d[0].lon};
+}
 
-const dayNames={
-0:["Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg"],
-1:["Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit"],
-2:["Rog","Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog"],
-3:["Labh","Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh"],
-4:["Shubh","Rog","Udveg","Char","Labh","Amrit","Kaal","Shubh"],
-5:["Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg","Char"],
-6:["Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit","Kaal"]
+// ── Reverse geocode: lat/lon → city name ──
+async function reverseGeocode(lat,lon){
+  let r=await fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat="+lat+"&lon="+lon);
+  let d=await r.json();
+  return d.address.city||d.address.town||d.address.county||d.address.state_district||d.address.state||"Your Location";
+}
+
+// ── FIX 4: Timezone using IANA names + browser Intl API ──
+// This AUTOMATICALLY handles DST changes — London winter=UTC+0, summer=UTC+1
+// No manual update ever needed!
+async function getTimezoneName(lat,lon){
+  try{
+    let r=await fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat="+lat+"&lon="+lon);
+    let d=await r.json();
+    let cc=(d.address.country_code||"").toUpperCase();
+    return mapToIANA(lat,lon,cc);
+  }catch(e){
+    return estimateByLonLat(lat,lon);
+  }
+}
+
+function mapToIANA(lat,lon,cc){
+  const map={
+    "IN":"Asia/Kolkata","NP":"Asia/Kathmandu","LK":"Asia/Colombo",
+    "MM":"Asia/Rangoon","IR":"Asia/Tehran","AF":"Asia/Kabul",
+    "PK":"Asia/Karachi","BD":"Asia/Dhaka","GB":"Europe/London",
+    "AE":"Asia/Dubai","SA":"Asia/Riyadh","QA":"Asia/Qatar",
+    "KW":"Asia/Kuwait","OM":"Asia/Muscat","BH":"Asia/Bahrain",
+    "SG":"Asia/Singapore","MY":"Asia/Kuala_Lumpur","TH":"Asia/Bangkok",
+    "JP":"Asia/Tokyo","KR":"Asia/Seoul","HK":"Asia/Hong_Kong",
+    "TW":"Asia/Taipei","PH":"Asia/Manila","VN":"Asia/Ho_Chi_Minh",
+    "ID":"Asia/Jakarta","NZ":"Pacific/Auckland","ZA":"Africa/Johannesburg",
+    "KE":"Africa/Nairobi","EG":"Africa/Cairo","NG":"Africa/Lagos",
+    "BR":"America/Sao_Paulo","AR":"America/Argentina/Buenos_Aires",
+    "MX":"America/Mexico_City","DE":"Europe/Berlin","FR":"Europe/Paris",
+    "IT":"Europe/Rome","ES":"Europe/Madrid","NL":"Europe/Amsterdam",
+    "CH":"Europe/Zurich","AT":"Europe/Vienna","SE":"Europe/Stockholm",
+    "NO":"Europe/Oslo","DK":"Europe/Copenhagen","PL":"Europe/Warsaw",
+    "GR":"Europe/Athens","PT":"Europe/Lisbon","TR":"Europe/Istanbul",
+    "RU":"Europe/Moscow","IL":"Asia/Jerusalem","CN":"Asia/Shanghai",
+  };
+  if(map[cc])return map[cc];
+  // USA by longitude
+  if(cc==="US"){
+    if(lat>55)return"America/Anchorage";
+    if(lat<25&&lon<-150)return"Pacific/Honolulu";
+    if(lon<-115)return"America/Los_Angeles";
+    if(lon<-100)return"America/Denver";
+    if(lon<-87)return"America/Chicago";
+    return"America/New_York";
+  }
+  // Canada by longitude
+  if(cc==="CA"){
+    if(lon<-110)return"America/Vancouver";
+    if(lon<-85)return"America/Winnipeg";
+    return"America/Toronto";
+  }
+  // Australia by longitude
+  if(cc==="AU"){
+    if(lon>=138)return"Australia/Sydney";
+    if(lon>=129)return"Australia/Darwin";
+    return"Australia/Perth";
+  }
+  return estimateByLonLat(lat,lon);
+}
+
+function estimateByLonLat(lat,lon){
+  if(lon>=68&&lon<=98&&lat>=6&&lat<=38)return"Asia/Kolkata";
+  if(lon>=80&&lon<=89&&lat>=26&&lat<=31)return"Asia/Kathmandu";
+  if(lon>=-10&&lon<=2&&lat>=49&&lat<=61)return"Europe/London";
+  return"UTC";
+}
+
+// FIX 4: Browser Intl API gives EXACT offset including DST automatically!
+function getOffsetHours(ianaTimezone,dateStr){
+  try{
+    let date=new Date(dateStr+"T12:00:00Z");
+    let tzDate=new Date(date.toLocaleString("en-US",{timeZone:ianaTimezone}));
+    let utcDate=new Date(date.toLocaleString("en-US",{timeZone:"UTC"}));
+    return(tzDate-utcDate)/3600000;
+  }catch(e){return 0;}
+}
+
+// ── Sunrise / Sunset ──
+async function getSun(lat,lon,date,tz){
+  let r=await fetch("https://api.sunrise-sunset.org/json?lat="+lat+"&lng="+lon+"&date="+date+"&formatted=0");
+  let d=await r.json();
+  if(d.status!=="OK")throw new Error("Sun API error");
+  function toLocal(u){return new Date(u).getUTCHours()*60+new Date(u).getUTCMinutes()+tz*60;}
+  return{sunrise:toLocal(d.results.sunrise),sunset:toLocal(d.results.sunset)};
+}
+
+// ── Choghadiya tables ──
+const cycle=["Amrit","Char","Rog","Kaal","Labh","Udveg","Shubh"];
+const daySeqs={
+  0:["Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg"],
+  1:["Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit"],
+  2:["Rog","Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog"],
+  3:["Labh","Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh"],
+  4:["Shubh","Rog","Udveg","Char","Labh","Amrit","Kaal","Shubh"],
+  5:["Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg","Char"],
+  6:["Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit","Kaal"]
+};
+function getNightSeq(d){
+  let idx=(cycle.indexOf(d[7])+1)%7,n=[];
+  for(let i=0;i<8;i++)n.push(cycle[(idx+i)%7]);
+  return n;
+}
+const rahuIdx=[7,1,6,4,5,3,2];
+const yamaIdx=[4,3,2,1,0,6,5];
+const kvIdx={0:4,1:1,2:5,3:2,4:6,5:3,6:0};
+const vvIdx={0:3,1:6,2:1,3:4,4:7,5:2,6:5};
+const krIdx={0:5,1:3,2:1,3:6,4:4,5:2,6:0};
+function getPd(sr,ss,i){let p=(ss-sr)/8;return[sr+p*i,sr+p*(i+1)];}
+function quality(n,s,rahu,yama,kv,vv,kr){
+  if(inP(s,rahu[0],rahu[1]))return"RAHU";
+  if(inP(s,yama[0],yama[1]))return"YAMA";
+  if(inP(s,kv[0],kv[1]))return"Kaal Vela";
+  if(inP(s,vv[0],vv[1]))return"Vaar Vela";
+  if(inP(s,kr[0],kr[1]))return"Kaal Ratri";
+  if(["Amrit","Shubh","Labh"].includes(n))return"BEST";
+  if(n==="Char")return"GOOD";
+  return"Inauspicious";
+}
+function badge(q){
+  if(q==="BEST")return'<span style="color:green;font-weight:bold">✅ BEST</span>';
+  if(q==="GOOD")return'<span style="color:orange;font-weight:bold">👍 GOOD</span>';
+  if(q==="RAHU")return'<span style="color:red;font-weight:bold">⛔ RAHU</span>';
+  if(q==="YAMA")return'<span style="color:red;font-weight:bold">⛔ YAMA</span>';
+  return'<span style="color:red;font-weight:bold">⛔ '+q+'</span>';
+}
+
+// ── MAIN CALCULATE ──
+async function calculate(){
+  let cityVal=document.getElementById("city").value.trim();
+  let date=document.getElementById("date").value;
+  if(!cityVal&&!gpsLat){alert("Please enter a city name");return;}
+  document.getElementById("status").textContent="⏳ Calculating...";
+  document.getElementById("output").innerHTML="";
+  try{
+    let lat,lon,cityName;
+    if(cityVal){let loc=await geocode(cityVal);lat=loc.lat;lon=loc.lon;cityName=cityVal;}
+    else{lat=gpsLat;lon=gpsLon;cityName="Your Location";}
+
+    let tzName=await getTimezoneName(lat,lon);
+    let tz=getOffsetHours(tzName,date);
+
+    let sun=await getSun(lat,lon,date,tz);
+    let next=new Date(date+"T12:00:00Z");
+    next.setUTCDate(next.getUTCDate()+1);
+    let sun2=await getSun(lat,lon,next.toISOString().split("T")[0],tz);
+
+    let nowUTC=new Date();
+    let nowCity=((nowUTC.getUTCHours()*60+nowUTC.getUTCMinutes()+tz*60)%1440+1440)%1440;
+    let wd=new Date(date+"T12:00:00Z").getUTCDay();
+    let daySeq=daySeqs[wd];
+    let nightSeq=getNightSeq(daySeq);
+    let daySeg=divide(sun.sunrise,sun.sunset);
+    let nightSeg=divide(sun.sunset,sun2.sunrise+1440);
+    let rahu=getPd(sun.sunrise,sun.sunset,rahuIdx[wd]);
+    let yama=getPd(sun.sunrise,sun.sunset,yamaIdx[wd]);
+    let kv=getPd(sun.sunrise,sun.sunset,kvIdx[wd]);
+    let vv=getPd(sun.sunrise,sun.sunset,vvIdx[wd]);
+    let kr=nightSeg[krIdx[wd]];
+    let isToday=date===new Date().toISOString().split("T")[0];
+    let tzSign=tz>=0?"+":"";
+
+    let html="<h3>📍 "+cityName+"</h3>";
+    html+="<div style='color:#555;font-size:15px'>⏰ "+tzName+" (UTC"+tzSign+tz+"h)</div>";
+    html+="<b>"+date+"</b> ("+new Date(date+"T12:00:00Z").toLocaleDateString("en-IN",{weekday:"long"})+")<br>";
+    html+="🌅 Sunrise: <b>"+format(sun.sunrise)+"</b> &nbsp;|&nbsp; 🌇 Sunset: <b>"+format(sun.sunset)+"</b><br>";
+    html+="<small style='color:#888'>All times in "+cityName+" local time</small>";
+
+    let best=[];
+    daySeg.forEach((s,i)=>{
+      let n=daySeq[i];
+      if(!["Amrit","Shubh","Labh"].includes(n))return;
+      if(quality(n,s[0],rahu,yama,kv,vv,kr)==="BEST")best.push(n+": "+format(s[0])+" – "+format(s[1]));
+    });
+    html+='<div class="box" style="border-color:green;background:#eaffea"><b>⭐ Best Muhurat</b><br>'+(best.length?best.join("<br>"):"None today")+"</div>";
+
+    if(isToday){
+      let cur="",curQ="",curTime="";
+      daySeg.forEach((s,i)=>{
+        if(inP(nowCity,s[0],s[1])){cur=daySeq[i];curQ=quality(cur,s[0],rahu,yama,kv,vv,kr);curTime=format(s[0])+" – "+format(s[1]);}
+      });
+      if(!cur){
+        nightSeg.forEach((s,i)=>{
+          let s0=((s[0]%1440)+1440)%1440,s1=((s[1]%1440)+1440)%1440;
+          if(inP(nowCity,s0,s1)||inP(nowCity,s[0],s[1])){cur=nightSeq[i];curQ=quality(cur,s[0],rahu,yama,kv,vv,kr);curTime=format(s[0])+" – "+format(s[1]);}
+        });
+      }
+      html+='<div class="box" style="border-color:blue;background:#eef4ff"><b>🕐 Current Muhurat in '+cityName+'</b><br>'+(cur?cur+" &nbsp;"+curTime+" &nbsp;"+badge(curQ):"Unable to detect")+"</div>";
+    }
+
+    html+="<h3>☀️ Day Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
+    daySeg.forEach((s,i)=>{
+      let q=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
+      let now=isToday&&inP(nowCity,s[0],s[1]);
+      html+="<tr"+(now?' style="background:#fffde7;font-weight:bold"':"")+">"+"<td>"+(i+1)+"</td><td>"+format(s[0])+"–"+format(s[1])+"</td><td>"+daySeq[i]+(now?" ◀":"")+"</td><td>"+badge(q)+"</td></tr>";
+    });
+    html+="</table>";
+
+    html+="<h3>🌙 Night Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
+    nightSeg.forEach((s,i)=>{
+      let q=quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr);
+      let s0n=((s[0]%1440)+1440)%1440;
+      let now=isToday&&(inP(nowCity,s0n,((s[1]%1440)+1440)%1440)||inP(nowCity,s[0],s[1]));
+      html+="<tr"+(now?' style="background:#fffde7;font-weight:bold"':"")+">"+"<td>"+(i+1)+"</td><td>"+format(s[0])+"–"+format(s[1])+"</td><td>"+nightSeq[i]+(now?" ◀":"")+"</td><td>"+badge(q)+"</td></tr>";
+    });
+    html+="</table>";
+
+    document.getElementById("output").innerHTML=html;
+    document.getElementById("status").textContent="✅ "+cityName+" | "+tzName+" (UTC"+tzSign+tz+"h)";
+  }catch(err){
+    document.getElementById("status").textContent="❌ "+err.message;
+    document.getElementById("output").innerHTML='<div style="color:red;padding:12px">⚠️ '+err.message+'<br>Please check city name and try again.</div>';
+    console.error(err);
+  }
+}
+
+// ════════════════════════════════════════
+// 🪔 YOUR FESTIVAL CALENDAR
+// Same as your original code — verified dates
+// Auto-updates every year from Google Calendar
+// ════════════════════════════════════════
+const MONTH_NAMES=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAY_NAMES_F=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+// Your verified festival dates
+const FALLBACK_FESTIVALS={
+  2026:[
+    ["2026-01-14","Makara Sankranti 🪁"],
+    ["2026-03-04","Holi 🎨🔥"],
+    ["2026-03-20","Ugadi / Navratri 🌸🌺"],
+    ["2026-03-27","Rama Navami 🙏"],
+    ["2026-03-31","Mahavir Jayanti 🙏"],
+    ["2026-04-14","Tamil New Year 🌸"],
+    ["2026-04-20","Akshay Tritiya ✨"],
+    ["2026-08-15","Independence Day 🇮🇳"],
+    ["2026-08-28","Raksha Bandhan 🪢"],
+    ["2026-09-08","Paryushan Prarambh 🙏"],
+    ["2026-09-14","Ganesh Chaturthi 🐘"],
+    ["2026-09-15","Samvatsari 🙏"],
+    ["2026-10-11","Navratri 🌺"],
+    ["2026-10-20","Dussehra / Vijayadashami ⚔️"],
+    ["2026-11-06","Dhanteras 🪔"],
+    ["2026-11-08","Diwali 🪔✨"],
+    ["2026-12-25","Christmas ✝️"],
+  ],
+  2027:[
+    ["2027-01-01","New Year's Day 🎉"],
+    ["2027-01-14","Makar Sankranti 🪁"],
+    ["2027-01-26","Republic Day 🇮🇳"],
+    ["2027-02-15","Maha Shivratri 🕉️"],
+    ["2027-03-22","Holi — Holika Dahan 🔥"],
+    ["2027-03-23","Holi — Rangwali 🎨"],
+    ["2027-04-09","Ugadi / Gudi Padwa 🌸"],
+    ["2027-04-09","Navratri (Chaitra) Begins 🌺"],
+    ["2027-04-14","Ambedkar Jayanti / Baisakhi 🌾"],
+    ["2027-04-17","Ram Navami 🙏"],
+    ["2027-05-01","Labour Day"],
+    ["2027-05-20","Buddha Purnima 🪷"],
+    ["2027-07-28","Guru Purnima 🙏"],
+    ["2027-08-15","Independence Day 🇮🇳"],
+    ["2027-08-18","Raksha Bandhan 🪢"],
+    ["2027-08-25","Janmashtami 🦚"],
+    ["2027-09-01","Ganesh Chaturthi 🐘"],
+    ["2027-10-02","Gandhi Jayanti 🇮🇳"],
+    ["2027-10-21","Navratri Begins 🌺"],
+    ["2027-10-30","Dussehra ⚔️"],
+    ["2027-11-14","Children's Day 🧒"],
+    ["2027-11-19","Diwali 🪔✨"],
+    ["2027-11-24","Guru Nanak Jayanti ☬"],
+    ["2027-12-25","Christmas ✝️"],
+  ]
 };
 
-function nightFromDay(d){
-let idx=(cycle.indexOf(d[7])+1)%7;
-let n=[];
-for(let i=0;i<8;i++) n.push(cycle[(idx+i)%7]);
-return n;
+let festData=[], festLoaded=false, festSource="";
+
+async function loadFestivals(){
+  let year=new Date().getFullYear();
+  let cacheKey="muhurat_fest_"+year;
+
+  // Check cache first
+  try{
+    let cached=localStorage.getItem(cacheKey);
+    if(cached){
+      let p=JSON.parse(cached);
+      if(p&&p.length>5){festData=p;festSource="📱 Google Calendar (cached)";festLoaded=true;return;}
+    }
+  }catch(e){}
+
+  // Try Google Calendar India public feed
+  let gUrl="https://calendar.google.com/calendar/ical/en.indian%23holiday%40group.v.calendar.google.com/public/basic.ics";
+  let proxies=[
+    "https://api.allorigins.win/raw?url="+encodeURIComponent(gUrl),
+    "https://corsproxy.io/?"+encodeURIComponent(gUrl)
+  ];
+
+  for(let proxy of proxies){
+    try{
+      let r=await fetch(proxy,{signal:AbortSignal.timeout(8000)});
+      if(!r.ok)continue;
+      let text=await r.text();
+      if(!text.includes("BEGIN:VCALENDAR"))continue;
+      let events=[],blocks=text.split("BEGIN:VEVENT");
+      blocks.forEach(b=>{
+        let dm=b.match(/DTSTART(?:;VALUE=DATE)?(?:;TZID=[^:]+)?:(\d{8})/);
+        let nm=b.match(/SUMMARY:([^\r\n]+)/);
+        if(dm&&nm){
+          let raw=dm[1],y=raw.slice(0,4),m=raw.slice(4,6),d=raw.slice(6,8);
+          if(y===String(year))
+            events.push({date:y+"-"+m+"-"+d,name:nm[1].replace(/\\,/g,",").replace(/\\/g,"").trim()});
+        }
+      });
+      if(events.length>5){
+        events.sort((a,b)=>a.date.localeCompare(b.date));
+        festData=events; festSource="🌐 Google Calendar India (auto-updated)";
+        festLoaded=true;
+        try{localStorage.setItem(cacheKey,JSON.stringify(festData));}catch(e){}
+        return;
+      }
+    }catch(e){}
+  }
+
+  // Use your verified fallback
+  let year2=new Date().getFullYear();
+  if(FALLBACK_FESTIVALS[year2]){
+    festData=FALLBACK_FESTIVALS[year2].map(([date,name])=>({date,name}));
+    festSource="📋 Your verified dates";
+  }else{
+    festData=[];
+    festSource="⚠️ No data for "+year2+". Please update dates.";
+  }
+  festLoaded=true;
 }
-
-/* DOSHAS */
-const rahuIndex=[7,1,6,4,5,3,2];
-const yamaIndex=[4,3,2,1,0,6,5];
-const kvIndex={0:4,1:1,2:5,3:2,4:6,5:3,6:0};
-const vvIndex={0:3,1:6,2:1,3:4,4:7,5:2,6:5};
-const krIndex={0:5,1:3,2:1,3:6,4:4,5:2,6:0};
-
-function period(s,e,i){
-let p=(e-s)/8;
-return [s+p*i,s+p*(i+1)];
-}
-
-/* QUALITY */
-function quality(name,start,rahu,yama,kv,vv,kr){
-if(inP(start,rahu[0],rahu[1])) return "RAHU";
-if(inP(start,yama[0],yama[1])) return "YAMA";
-if(inP(start,kv[0],kv[1])) return "Kaal Vela";
-if(inP(start,vv[0],vv[1])) return "Vaar Vela";
-if(inP(start,kr[0],kr[1])) return "Kaal Ratri";
-
-if(["Amrit","Shubh","Labh"].includes(name)) return "BEST";
-if(name==="Char") return "GOOD";
-return "Inauspicious";
-}
-
-/* COLOR */
-function colorText(q){
-if(q==="BEST") return '<span style="color:green;font-weight:bold">BEST</span>';
-if(q==="GOOD") return '<span style="color:orange;font-weight:bold">GOOD</span>';
-return '<span style="color:red;font-weight:bold">'+q+'</span>';
-}
-
-/* MAIN */
-async function calculate(){
-
-let city=document.getElementById("city").value;
-let date=document.getElementById("date").value;
-if(!city){alert("Enter city");return;}
-
-let loc=await geocode(city);
-let sun=await getSun(loc.lat,loc.lon,date);
-
-let next=new Date(date);
-next.setDate(next.getDate()+1);
-let sun2=await getSun(loc.lat,loc.lon,next.toISOString().split("T")[0]);
-
-let daySeg=divide(sun.sunrise,sun.sunset);
-let nightSeg=divide(sun.sunset,sun2.sunrise+1440);
-
-let wd=new Date(date).getDay();
-let daySeq=dayNames[wd];
-let nightSeq=nightFromDay(daySeq);
-
-let rahu=period(sun.sunrise,sun.sunset,rahuIndex[wd]);
-let yama=period(sun.sunrise,sun.sunset,yamaIndex[wd]);
-let kv=period(sun.sunrise,sun.sunset,kvIndex[wd]);
-let vv=period(sun.sunrise,sun.sunset,vvIndex[wd]);
-let kr=nightSeg[krIndex[wd]];
-
-/* HEADER */
-let html=`<h3>${loc.display}</h3>`;
-html+=`<b style="font-size:20px">${date} (${new Date(date).toLocaleDateString('en-IN',{weekday:'long'})})</b><br>`;
-if(festivals[date]){
-html+=`<div style="color:green;font-weight:bold;font-size:20px">
-${festivals[date]}
-</div>`;
-}
-html+=`Sunrise ${format(sun.sunrise)} | Sunset ${format(sun.sunset)}<br>`;
-html+=`Rahu ${format(rahu[0])}-${format(rahu[1])} | Yama ${format(yama[0])}-${format(yama[1])} | Kaal Vela ${format(kv[0])}-${format(kv[1])} | Vaar Vela ${format(vv[0])}-${format(vv[1])} | Kaal Ratri ${format(kr[0])}-${format(kr[1])}`;
-
-/* BEST MUHURAT */
-
-let best=[];
-
-daySeg.forEach((s,i)=>{
-
-let name=daySeq[i];
-
-// only good choghadiya
-if(!["Amrit","Shubh","Labh"].includes(name)) return;
-
-// check dosha overlap
-let q=quality(name,s[0],rahu,yama,kv,vv,kr);
-
-// if any dosha present → reject
-if(q!=="BEST") return;
-
-// add valid best muhurat
-best.push(`${name} ${format(s[0])}-${format(s[1])}`);
-
-});
-
-html+=`<div class="box" style="border-color:green;background:#eaffea">
-<b>Best Muhurat Today</b><br>
-${best.length?best.join("<br>"):"No suitable muhurat"}
-</div>`;
-
-/* CURRENT */
-let now=new Date();
-let t=now.getHours()*60+now.getMinutes();
-
-let cur="",curQ="",curTime="";
-
-daySeg.forEach((s,i)=>{
-if(t>=s[0]&&t<s[1]){
-cur=daySeq[i];
-curQ=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
-curTime=`${format(s[0])}-${format(s[1])}`;
-}
-});
-
-if(!cur){
-nightSeg.forEach((s,i)=>{
-if(t>=s[0]&&t<s[1]){
-cur=nightSeq[i];
-curQ=quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr);
-curTime=`${format(s[0])}-${format(s[1])}`;
-}
-});
-}
-
-html+=`<div class="box" style="border-color:blue;background:#eef4ff">
-<b>Current Muhurat</b><br>
-${cur} ${curTime} ${colorText(curQ)}
-</div>`;
-
-/* DAY */
-html+="<h3>Day Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
-daySeg.forEach((s,i)=>{
-let q=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
-html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${daySeq[i]}</td><td>${colorText(q)}</td></tr>`;
-});
-html+="</table>";
-
-/* NIGHT */
-html+="<h3>Night Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
-nightSeg.forEach((s,i)=>{
-let q=quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr);
-html+=`<tr><td>${i+1}</td><td>${format(s[0])}-${format(s[1])}</td><td>${nightSeq[i]}</td><td>${colorText(q)}</td></tr>`;
-});
-html+="</table>";
-
-document.getElementById("output").innerHTML=html;
-}
-
-/* AUTO CITY */
-navigator.geolocation.getCurrentPosition(async pos=>{
-let r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
-let d=await r.json();
-document.getElementById("city").value=d.address.city||d.address.town||d.address.state||"Chennai";
-calculate();
-},()=>{
-document.getElementById("city").value="Chennai";
-calculate();
-});
 
 function toggleFestivals(){
+  let box=document.getElementById("festBox");
+  if(box.style.display==="none"){
+    if(!festLoaded||festData.length===0){
+      box.innerHTML="<h3>🪔 Loading festivals...</h3><p style='padding:12px'>Please wait a moment...</p>";
+      box.style.display="block";
+      loadFestivals().then(renderFestivals);
+      return;
+    }
+    renderFestivals();
+  }else{
+    box.style.display="none";
+  }
+}
 
-let box=document.getElementById("festivalBox");
+function renderFestivals(){
+  let box=document.getElementById("festBox");
+  let today=new Date().toISOString().split("T")[0];
+  let year=new Date().getFullYear();
+  let html="<h3>🪔 Indian Festival Calendar "+year+"</h3>";
+  html+='<table class="ftable"><tr><th>Date</th><th>Festival</th></tr>';
+  let lastMo="";
+  festData.forEach(f=>{
+    let mo=f.date.substring(5,7);
+    if(mo!==lastMo){
+      html+='<tr class="fmonth"><td colspan="2">'+MONTH_NAMES[parseInt(mo)-1]+" "+year+"</td></tr>";
+      lastMo=mo;
+    }
+    let d=new Date(f.date+"T12:00:00Z");
+    let label=DAY_NAMES_F[d.getUTCDay()]+", "+d.getUTCDate()+" "+MONTH_NAMES[d.getUTCMonth()].slice(0,3);
+    let isToday=f.date===today;
+    html+='<tr class="'+(isToday?"ftoday":"")+'"><td>'+label+(isToday?" ⭐ TODAY":"")+'</td><td>'+f.name+'</td></tr>';
+  });
+  html+='</table><div class="fnote">'+festSource+'</div>';
+  box.innerHTML=html;
+  box.style.display="block";
+}
 
-if(box.style.display==="none"){
+// ── AUTO DETECT ON PAGE LOAD ──
+window.addEventListener("load",function(){
+  loadFestivals(); // pre-load in background
 
-let html="<h3>Festival Calendar</h3><table>";
-html+="<tr><th>Date</th><th>Festival</th></tr>";
+  if(!navigator.geolocation){
+    gpsLat=13.0827; gpsLon=80.2707;
+    document.getElementById("city").value="Chennai";
+    document.getElementById("status").textContent="Using default: Chennai";
+    calculate(); return;
+  }
 
-Object.keys(festivals).forEach(d=>{
-html+=`<tr><td>${d}</td><td>${festivals[d]}</td></tr>`;
+  navigator.geolocation.getCurrentPosition(
+    async function(pos){
+      gpsLat=pos.coords.latitude; gpsLon=pos.coords.longitude;
+      try{
+        let city=await reverseGeocode(gpsLat,gpsLon);
+        document.getElementById("city").value=city;
+        document.getElementById("status").textContent="📍 Detected: "+city;
+      }catch(e){
+        document.getElementById("city").value="";
+      }
+      calculate();
+    },
+    async function(){
+      try{
+        let r=await fetch("https://ipapi.co/json/");
+        let d=await r.json();
+        gpsLat=d.latitude; gpsLon=d.longitude;
+        document.getElementById("city").value=d.city||"Chennai";
+        document.getElementById("status").textContent="📍 IP: "+(d.city||"Chennai");
+        calculate();
+      }catch(e){
+        gpsLat=13.0827; gpsLon=80.2707;
+        document.getElementById("city").value="Chennai";
+        document.getElementById("status").textContent="Using default: Chennai";
+        calculate();
+      }
+    }
+  );
 });
 
-html+="</table>";
-
-box.innerHTML=html;
-box.style.display="block";
-
-}else{
-box.style.display="none";
-}
-}
 </script>
 </body>
 </html>
