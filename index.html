@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Universal Muhurat Calculator</title>
+<title>Muhurat Calculator / मुहूर्त कैलकुलेटर</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
@@ -10,9 +10,72 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Muhurat">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff8c00">
 <style>
-body{font-family:Arial;font-size:18px;max-width:720px;margin:auto;padding:10px;background:#fafafa;}
-h2{text-align:center;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial;background:#fafafa;min-height:100vh;}
+
+/* ── Language Selector Screen ── */
+#langScreen{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-height:100vh;
+  background:linear-gradient(135deg,#fff3e0,#fafafa);
+  padding:30px 20px;
+}
+#langScreen .logo{
+  font-size:4rem;margin-bottom:10px;
+}
+#langScreen h1{
+  font-size:1.6rem;font-weight:900;color:#ff8c00;
+  text-align:center;margin-bottom:6px;letter-spacing:1px;
+}
+#langScreen h2{
+  font-size:1.3rem;font-weight:900;color:#333;
+  text-align:center;margin-bottom:8px;
+}
+#langScreen p{
+  font-size:1rem;color:#666;text-align:center;
+  margin-bottom:30px;line-height:1.5;
+}
+.lang-btn{
+  width:100%;max-width:320px;padding:18px;margin:10px 0;
+  border:none;border-radius:14px;font-size:1.3rem;
+  font-weight:900;cursor:pointer;letter-spacing:1px;
+  transition:transform .1s,box-shadow .1s;
+}
+.lang-btn:active{transform:scale(0.97);}
+.btn-english{
+  background:#ff8c00;color:#fff;
+  box-shadow:0 4px 12px rgba(255,140,0,.4);
+}
+.btn-hindi{
+  background:#138808;color:#fff;
+  box-shadow:0 4px 12px rgba(19,136,8,.4);
+}
+.lang-note{
+  font-size:0.85rem;color:#999;text-align:center;
+  margin-top:20px;
+}
+
+/* ── Main App ── */
+#app{display:none;}
+.app-header{
+  background:#ff8c00;color:#fff;
+  padding:8px 12px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.app-header h2{font-size:1rem;font-weight:900;}
+.lang-switch{
+  font-size:0.8rem;font-weight:700;
+  background:rgba(255,255,255,.25);
+  border:1px solid rgba(255,255,255,.5);
+  color:#fff;padding:4px 10px;border-radius:20px;
+  cursor:pointer;
+}
+.app-body{max-width:720px;margin:0 auto;padding:10px;}
+
+/* ── App Styles ── */
 input,button{padding:12px;margin:6px 0;width:100%;font-size:17px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;}
 button{background:#ff8c00;color:white;font-weight:bold;border:none;cursor:pointer;}
 button:hover{background:#e07800;}
@@ -27,64 +90,182 @@ th{background:#f0f0f0;}
 .ftable th{background:#ffe0b2;padding:8px 12px;font-size:1rem;text-align:left;border-bottom:2px solid #ccc;}
 .ftable td{padding:8px 12px;font-size:1rem;font-weight:bold;border-bottom:1px solid #eee;color:#111;}
 .ftable tr:nth-child(even) td{background:#fff8f0;}
-.fmonth td{background:#ff8c00!important;color:#fff!important;font-weight:900;text-transform:uppercase;}
+.fmonth td{background:#ff8c00!important;color:#fff!important;font-weight:900;font-size:1.1rem;}
 .ftoday td{background:#fff9c4!important;font-weight:900;}
+.fest-name{color:green!important;font-weight:900;font-size:1.15rem;}
 </style>
 </head>
 <body>
-<h2>Universal Muhurat Calculator</h2>
-<input id="city" placeholder="Enter City Name">
-<input id="date" type="date">
-<div id="status">Detecting your location...</div>
-<button onclick="calculate()">Calculate</button>
-<button onclick="toggleFestivals()">Show / Hide Festival Calendar</button>
-<div id="festBox"></div>
-<div id="output"></div>
+
+<!-- ── LANGUAGE SELECTOR (shown on first open) ── -->
+<div id="langScreen">
+  <div class="logo">🪔</div>
+  <h1>Muhurat Calculator</h1>
+  <h2>मुहूर्त कैलकुलेटर</h2>
+  <p>
+    Choose your language<br>
+    अपनी भाषा चुनें
+  </p>
+  <button class="lang-btn btn-english" onclick="setLang('en')">
+    🇬🇧 &nbsp; English
+  </button>
+  <button class="lang-btn btn-hindi" onclick="setLang('hi')">
+    🇮🇳 &nbsp; हिंदी
+  </button>
+  <p class="lang-note">
+    Your choice will be remembered<br>
+    आपकी पसंद याद रखी जाएगी
+  </p>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="app">
+  <div class="app-header">
+    <h2 id="appTitle">Universal Muhurat Calculator</h2>
+    <button class="lang-switch" onclick="changeLang()">🌐 भाषा / Language</button>
+  </div>
+  <div class="app-body">
+    <input id="city" placeholder="Enter City Name">
+    <input id="date" type="date">
+    <div id="status">Detecting location...</div>
+    <button id="calcBtn" onclick="calculate()">Calculate</button>
+    <button id="festBtn" onclick="toggleFestivals()">🪔 Festival Calendar</button>
+    <div id="festBox"></div>
+    <div id="output"></div>
+  </div>
+</div>
 
 <script>
 
-// ── Set today's date using phone local time ──
-document.getElementById("date").value = getPhoneDateStr();
+// ══════════════════════════════════
+// LANGUAGE SYSTEM
+// ══════════════════════════════════
+let LANG = localStorage.getItem("muhurat_lang") || null;
 
+const T = {
+  en: {
+    appTitle:    "Universal Muhurat Calculator",
+    placeholder: "Enter City Name",
+    calcBtn:     "Calculate",
+    festBtn:     "🪔 Festival Calendar",
+    detecting:   "Detecting your location...",
+    calculating: "Calculating...",
+    detected:    "Detected: ",
+    ipLocation:  "IP Location: ",
+    defaultCity: "Using default: Chennai",
+    sunrise:     "Sunrise",
+    sunset:      "Sunset",
+    allTimes:    "All times in",
+    localTime:   "local time",
+    bestTitle:   "⭐ Best Muhurat",
+    noBest:      "None today",
+    currentTitle:"Current Muhurat in",
+    undetected:  "Unable to detect",
+    beforeSun:   "Before sunrise — last night",
+    dayChog:     "Day Choghadiya",
+    nightChog:   "Night Choghadiya",
+    tableTime:   "Time",
+    tableName:   "Name",
+    tableQual:   "Quality",
+    now:         " ◀ NOW",
+    festTitle:   "Festival Calendar",
+    noFestData:  "No festival data for",
+    festNote:    "Please update from Padmodaya calendar",
+    todayLabel:  " ⭐ TODAY",
+    rahu:"Rahu", yama:"Yama", kv:"KV", vv:"VV", kr:"KR",
+    chogNames:   ["Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg"],
+    qBest:"BEST", qGood:"GOOD", qInauspicious:"Inauspicious",
+    qRahu:"RAHU", qYama:"YAMA", qKV:"Kaal Vela", qVV:"Vaar Vela", qKR:"Kaal Ratri",
+    badgeBest:   '<span style="color:green;font-weight:bold">BEST ✅</span>',
+    badgeGood:   '<span style="color:orange;font-weight:bold">GOOD</span>',
+    months:["January","February","March","April","May","June","July","August","September","October","November","December"],
+    days:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
+    locale:"en-IN",
+    cityLabel:"",
+    bestSuffix:" &nbsp;<span style='color:green;font-weight:bold'>BEST ✅</span>",
+  },
+  hi: {
+    appTitle:    "सार्वभौमिक मुहूर्त कैलकुलेटर",
+    placeholder: "शहर का नाम लिखें",
+    calcBtn:     "गणना करें",
+    festBtn:     "🪔 पर्व कैलेंडर",
+    detecting:   "आपका स्थान पता लगाया जा रहा है...",
+    calculating: "गणना हो रही है...",
+    detected:    "पता चला: ",
+    ipLocation:  "IP स्थान: ",
+    defaultCity: "डिफ़ॉल्ट: चेन्नई",
+    sunrise:     "सूर्योदय",
+    sunset:      "सूर्यास्त",
+    allTimes:    "सभी समय",
+    localTime:   "के स्थानीय समय में",
+    bestTitle:   "✨ शुभ मुहूर्त (सर्वोत्तम समय)",
+    noBest:      "आज कोई शुभ मुहूर्त नहीं",
+    currentTitle:"वर्तमान मुहूर्त —",
+    undetected:  "पता नहीं चला",
+    beforeSun:   "सूर्योदय से पहले — कल रात",
+    dayChog:     "दिन चौघड़िया",
+    nightChog:   "रात चौघड़िया",
+    tableTime:   "समय",
+    tableName:   "नाम",
+    tableQual:   "गुण",
+    now:         " ◀ अभी",
+    festTitle:   "पर्व कैलेंडर",
+    noFestData:  "इस वर्ष के लिए डेटा नहीं:",
+    festNote:    "कृपया पद्मोदय कैलेंडर से अपडेट करें",
+    todayLabel:  " ⭐ आज",
+    rahu:"राहु", yama:"यम", kv:"काल वेला", vv:"वार वेला", kr:"काल रात्रि",
+    chogNames:   ["उद्वेग","चर","लाभ","अमृत","काल","शुभ","रोग","उद्वेग"],
+    qBest:"सर्वोत्तम", qGood:"उत्तम", qInauspicious:"अशुभ",
+    qRahu:"राहु", qYama:"यम", qKV:"काल वेला", qVV:"वार वेला", qKR:"काल रात्रि",
+    badgeBest:   '<span style="color:green;font-weight:bold">सर्वोत्तम ✅</span>',
+    badgeGood:   '<span style="color:orange;font-weight:bold">उत्तम</span>',
+    months:["जनवरी","फरवरी","मार्च","अप्रैल","मई","जून","जुलाई","अगस्त","सितंबर","अक्टूबर","नवंबर","दिसंबर"],
+    days:["रवि","सोम","मंगल","बुध","गुरु","शुक्र","शनि"],
+    locale:"hi-IN",
+    cityLabel:"",
+    bestSuffix:" &nbsp;<span style='color:green;font-weight:bold'>सर्वोत्तम ✅</span>",
+  }
+};
+
+function setLang(lang){
+  LANG = lang;
+  localStorage.setItem("muhurat_lang", lang);
+  applyLang();
+  document.getElementById("langScreen").style.display="none";
+  document.getElementById("app").style.display="block";
+  initApp();
+}
+
+function changeLang(){
+  // Show language selector again
+  document.getElementById("langScreen").style.display="flex";
+  document.getElementById("app").style.display="none";
+}
+
+function applyLang(){
+  let t = T[LANG];
+  document.getElementById("appTitle").textContent    = t.appTitle;
+  document.getElementById("city").placeholder        = t.placeholder;
+  document.getElementById("calcBtn").textContent     = t.calcBtn;
+  document.getElementById("festBtn").innerHTML       = t.festBtn;
+  document.getElementById("status").textContent      = t.detecting;
+}
+
+// ══════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════
 function getPhoneDateStr(){
   let n=new Date();
   return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0");
 }
 
-// ── Get date in TARGET CITY timezone ──
 function getCityDateStr(tzOffset){
   let now=new Date();
-  // Get total city minutes from start of today UTC
-  let utcMs = now.getTime();
-  let cityMs = utcMs + tzOffset*3600000;
-  let cityDate = new Date(cityMs);
-  return cityDate.getUTCFullYear()+"-"+
-         String(cityDate.getUTCMonth()+1).padStart(2,"0")+"-"+
-         String(cityDate.getUTCDate()).padStart(2,"0");
+  let cityMs=now.getTime()+tzOffset*3600000;
+  let cityDate=new Date(cityMs);
+  return cityDate.getUTCFullYear()+"-"+String(cityDate.getUTCMonth()+1).padStart(2,"0")+"-"+String(cityDate.getUTCDate()).padStart(2,"0");
 }
 
-// Track if user manually changed the date
-let userPickedDate = false;
-
-// ── Auto calculate on date change ──
-document.getElementById("date").addEventListener("change", function(){
-  userPickedDate = true; // user manually picked a date
-  calculate();
-});
-
-// ── Auto calculate on city input ──
-let autoTimer=null;
-document.getElementById("city").addEventListener("input", function(){
-  clearTimeout(autoTimer);
-  userPickedDate = false; // city changed — reset to auto date
-  if(document.getElementById("city").value.trim().length>=3)
-    autoTimer=setTimeout(calculate,1500);
-});
-
-// ── GPS ──
-let gpsLat=null, gpsLon=null;
-
-// ── Format minutes → 12hr time ──
 function format(m){
   m=((m%1440)+1440)%1440;
   let h=Math.floor(m/60),mm=Math.round(m%60);
@@ -92,15 +273,12 @@ function format(m){
   return h12+":"+String(mm).padStart(2,"0")+" "+ampm;
 }
 
-function divide(s,e){
-  let p=(e-s)/8,a=[];
-  for(let i=0;i<8;i++)a.push([s+i*p,s+(i+1)*p]);
-  return a;
-}
-
+function divide(s,e){let p=(e-s)/8,a=[];for(let i=0;i<8;i++)a.push([s+i*p,s+(i+1)*p]);return a;}
 function inP(t,s,e){return t>=s&&t<e;}
 
-// ── City database ──
+// ══════════════════════════════════
+// CITY DATABASE
+// ══════════════════════════════════
 const CITIES={
   "mumbai":{lat:19.076,lon:72.877,tz:"Asia/Kolkata"},
   "delhi":{lat:28.613,lon:77.209,tz:"Asia/Kolkata"},
@@ -141,7 +319,6 @@ const CITIES={
   "shimla":{lat:31.104,lon:77.173,tz:"Asia/Kolkata"},
   "dehradun":{lat:30.316,lon:78.032,tz:"Asia/Kolkata"},
   "haridwar":{lat:29.945,lon:78.164,tz:"Asia/Kolkata"},
-  "varanasi":{lat:25.317,lon:82.973,tz:"Asia/Kolkata"},
   "ujjain":{lat:23.176,lon:75.788,tz:"Asia/Kolkata"},
   "mathura":{lat:27.492,lon:77.673,tz:"Asia/Kolkata"},
   "tirupati":{lat:13.628,lon:79.419,tz:"Asia/Kolkata"},
@@ -203,17 +380,58 @@ const CITIES={
   "istanbul":{lat:41.008,lon:28.978,tz:"Europe/Istanbul"},
 };
 
+const HINDI_CITIES={
+  "mumbai":"मुंबई","delhi":"दिल्ली","new delhi":"नई दिल्ली",
+  "chennai":"चेन्नई","bangalore":"बेंगलुरु","bengaluru":"बेंगलुरु",
+  "hyderabad":"हैदराबाद","kolkata":"कोलकाता","calcutta":"कोलकाता",
+  "pune":"पुणे","ahmedabad":"अहमदाबाद","jaipur":"जयपुर",
+  "surat":"सूरत","lucknow":"लखनऊ","nagpur":"नागपुर",
+  "indore":"इंदौर","bhopal":"भोपाल","patna":"पटना",
+  "vadodara":"वडोदरा","agra":"आगरा","varanasi":"वाराणसी",
+  "banaras":"बनारस","amritsar":"अमृतसर","chandigarh":"चंडीगढ़",
+  "coimbatore":"कोयम्बटूर","kochi":"कोच्चि","cochin":"कोच्चि",
+  "mysore":"मैसूर","mysuru":"मैसूरु","thiruvananthapuram":"तिरुवनंतपुरम",
+  "trivandrum":"तिरुवनंतपुरम","nashik":"नासिक","jodhpur":"जोधपुर",
+  "udaipur":"उदयपुर","goa":"गोवा","srinagar":"श्रीनगर",
+  "shimla":"शिमला","dehradun":"देहरादून","haridwar":"हरिद्वार",
+  "ujjain":"उज्जैन","mathura":"मथुरा","tirupati":"तिरुपति",
+  "shirdi":"शिरडी","kathmandu":"काठमांडू","colombo":"कोलंबो",
+  "dhaka":"ढाका","karachi":"कराची","lahore":"लाहौर",
+  "islamabad":"इस्लामाबाद","london":"लंदन","paris":"पेरिस",
+  "berlin":"बर्लिन","rome":"रोम","madrid":"मैड्रिड",
+  "dubai":"दुबई","abu dhabi":"अबू धाबी","riyadh":"रियाद",
+  "doha":"दोहा","muscat":"मस्कट","singapore":"सिंगापुर",
+  "bangkok":"बैंकॉक","tokyo":"टोक्यो","seoul":"सियोल",
+  "beijing":"बीजिंग","shanghai":"शंघाई","hong kong":"हांगकांग",
+  "sydney":"सिडनी","melbourne":"मेलबर्न","auckland":"ऑकलैंड",
+  "new york":"न्यूयॉर्क","los angeles":"लॉस एंजिल्स",
+  "chicago":"शिकागो","houston":"ह्यूस्टन","dallas":"डलास",
+  "san francisco":"सैन फ्रांसिस्को","seattle":"सिएटल",
+  "boston":"बोस्टन","miami":"मियामी","washington":"वाशिंगटन",
+  "washington dc":"वाशिंगटन डीसी","ashburn":"एशबर्न",
+  "atlanta":"अटलांटा","toronto":"टोरंटो","vancouver":"वैंकूवर",
+  "mexico city":"मेक्सिको सिटी","cairo":"काहिरा",
+  "nairobi":"नैरोबी","johannesburg":"जोहान्सबर्ग",
+  "cape town":"केप टाउन","lagos":"लागोस",
+  "tehran":"तेहरान","moscow":"मॉस्को","istanbul":"इस्तांबुल",
+};
+
+function getDisplayName(englishName){
+  if(LANG==="hi"){
+    let k=englishName.trim().toLowerCase();
+    return HINDI_CITIES[k]||englishName;
+  }
+  return englishName;
+}
+
 function findCity(name){
   let k=name.trim().toLowerCase();
   if(CITIES[k])return CITIES[k];
-  for(let key in CITIES){
-    if(key.includes(k)||k.includes(key))return CITIES[key];
-  }
+  for(let key in CITIES){if(key.includes(k)||k.includes(key))return CITIES[key];}
   return null;
 }
 
-// ── Get UTC offset including DST using browser Intl ──
-function getOffset(tzName, dateStr){
+function getOffset(tzName,dateStr){
   try{
     let d=new Date(dateStr+"T12:00:00Z");
     let a=new Date(d.toLocaleString("en-US",{timeZone:tzName}));
@@ -222,7 +440,6 @@ function getOffset(tzName, dateStr){
   }catch(e){return 5.5;}
 }
 
-// ── Guess timezone from coordinates ──
 function guessTz(lat,lon){
   if(lon>=68&&lon<=98&&lat>=6&&lat<=38)return"Asia/Kolkata";
   if(lon>=80&&lon<=89&&lat>=26&&lat<=31)return"Asia/Kathmandu";
@@ -232,17 +449,13 @@ function guessTz(lat,lon){
   if(lon>=-100&&lon<=-80&&lat>=25&&lat<=50)return"America/Chicago";
   if(lon>=-120&&lon<=-100&&lat>=25&&lat<=50)return"America/Los_Angeles";
   if(lon>=100&&lon<=145&&lat>=30&&lat<=50)return"Asia/Tokyo";
-  if(lon>=103&&lon<=105&&lat>=1&&lat<=2)return"Asia/Singapore";
   return"UTC";
 }
 
-// ── Sunrise/Sunset ──
 async function getSun(lat,lon,date,tz){
   let r=await fetch("https://api.sunrise-sunset.org/json?lat="+lat+"&lng="+lon+"&date="+date+"&formatted=0");
   let d=await r.json();
-  if(!d||d.status!=="OK")throw new Error("Cannot get sun times. Check internet connection.");
-  // WRAP to 0-1439 to handle high UTC offsets like Auckland UTC+13
-  // Without wrapping, Auckland sunrise = 1885 mins causing reversed segments
+  if(!d||d.status!=="OK")throw new Error(LANG==="hi"?"सूर्योदय-सूर्यास्त नहीं मिला। इंटरनेट जांचें।":"Cannot get sun times. Check internet.");
   function toLocal(u){
     let utcMins=new Date(u).getUTCHours()*60+new Date(u).getUTCMinutes();
     return((utcMins+tz*60)%1440+1440)%1440;
@@ -250,9 +463,10 @@ async function getSun(lat,lon,date,tz){
   return{sunrise:toLocal(d.results.sunrise),sunset:toLocal(d.results.sunset)};
 }
 
-// ── Choghadiya tables ──
-const cycle=["Amrit","Char","Rog","Kaal","Labh","Udveg","Shubh"];
-const daySeqs={
+// ══════════════════════════════════
+// CHOGHADIYA
+// ══════════════════════════════════
+const DAY_SEQS_EN={
   0:["Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg"],
   1:["Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit"],
   2:["Rog","Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog"],
@@ -261,11 +475,33 @@ const daySeqs={
   5:["Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg","Char"],
   6:["Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit","Kaal"]
 };
+const DAY_SEQS_HI={
+  0:["उद्वेग","चर","लाभ","अमृत","काल","शुभ","रोग","उद्वेग"],
+  1:["अमृत","काल","शुभ","रोग","उद्वेग","चर","लाभ","अमृत"],
+  2:["रोग","उद्वेग","चर","लाभ","अमृत","काल","शुभ","रोग"],
+  3:["लाभ","अमृत","काल","शुभ","रोग","उद्वेग","चर","लाभ"],
+  4:["शुभ","रोग","उद्वेग","चर","लाभ","अमृत","काल","शुभ"],
+  5:["चर","लाभ","अमृत","काल","शुभ","रोग","उद्वेग","चर"],
+  6:["काल","शुभ","रोग","उद्वेग","चर","लाभ","अमृत","काल"]
+};
+const CYCLE_EN=["Amrit","Char","Rog","Kaal","Labh","Udveg","Shubh"];
+const CYCLE_HI=["अमृत","चर","रोग","काल","लाभ","उद्वेग","शुभ"];
+const GOOD_EN=["Amrit","Shubh","Labh"];
+const GOOD_HI=["अमृत","शुभ","लाभ"];
+const CHAR_EN="Char"; const CHAR_HI="चर";
+
+function getDaySeqs(wd){return LANG==="hi"?DAY_SEQS_HI[wd]:DAY_SEQS_EN[wd];}
+function getCycle(){return LANG==="hi"?CYCLE_HI:CYCLE_EN;}
+function getGood(){return LANG==="hi"?GOOD_HI:GOOD_EN;}
+function getChar(){return LANG==="hi"?CHAR_HI:CHAR_EN;}
+
 function getNightSeq(d){
+  let cycle=getCycle();
   let idx=(cycle.indexOf(d[7])+1)%7,n=[];
   for(let i=0;i<8;i++)n.push(cycle[(idx+i)%7]);
   return n;
 }
+
 const rahuIdx=[7,1,6,4,5,3,2];
 const yamaIdx=[4,3,2,1,0,6,5];
 const kvIdx={0:4,1:1,2:5,3:2,4:6,5:3,6:0};
@@ -274,129 +510,127 @@ const krIdx={0:5,1:3,2:1,3:6,4:4,5:2,6:0};
 function getPd(sr,ss,i){let p=(ss-sr)/8;return[sr+p*i,sr+p*(i+1)];}
 
 function quality(n,s,rahu,yama,kv,vv,kr){
-  if(inP(s,rahu[0],rahu[1]))return"RAHU";
-  if(inP(s,yama[0],yama[1]))return"YAMA";
-  if(inP(s,kv[0],kv[1]))return"Kaal Vela";
-  if(inP(s,vv[0],vv[1]))return"Vaar Vela";
-  if(inP(s,kr[0],kr[1]))return"Kaal Ratri";
-  if(["Amrit","Shubh","Labh"].includes(n))return"BEST";
-  if(n==="Char")return"GOOD";
-  return"Inauspicious";
+  let t=T[LANG];
+  if(inP(s,rahu[0],rahu[1]))return t.qRahu;
+  if(inP(s,yama[0],yama[1]))return t.qYama;
+  if(inP(s,kv[0],kv[1]))   return t.qKV;
+  if(inP(s,vv[0],vv[1]))   return t.qVV;
+  if(inP(s,kr[0],kr[1]))   return t.qKR;
+  if(getGood().includes(n)) return t.qBest;
+  if(n===getChar())         return t.qGood;
+  return t.qInauspicious;
 }
 
 function badge(q){
-  if(q==="BEST")return'<span style="color:green;font-weight:bold">BEST</span>';
-  if(q==="GOOD")return'<span style="color:orange;font-weight:bold">GOOD</span>';
+  let t=T[LANG];
+  if(q===t.qBest) return t.badgeBest;
+  if(q===t.qGood) return t.badgeGood;
   return'<span style="color:red;font-weight:bold">'+q+'</span>';
 }
 
-// ── YOUR 17 FESTIVALS ONLY ──
+// ══════════════════════════════════
+// FESTIVALS
+// ══════════════════════════════════
 const MY_FESTIVALS={
   2026:[
-    ["2026-01-14","Makara Sankranti"],
-    ["2026-03-04","Holi"],
-    ["2026-03-20","Ugadi / Navratri"],
-    ["2026-03-27","Rama Navami"],
-    ["2026-03-31","Mahavir Jayanti"],
-    ["2026-04-14","Tamil New Year"],
-    ["2026-04-20","Akshay Tritiya"],
-    ["2026-08-15","Independence Day"],
-    ["2026-08-28","Raksha Bandhan"],
-    ["2026-09-08","Paryushan Prarambh"],
-    ["2026-09-14","Ganesh Chaturthi"],
-    ["2026-09-15","Samvatsari"],
-    ["2026-10-11","Navratri"],
-    ["2026-10-20","Dussehra / Vijayadashami"],
-    ["2026-11-06","Dhanteras"],
-    ["2026-11-08","Diwali"],
-    ["2026-12-25","Christmas"],
+    ["2026-01-14",  "Makara Sankranti",   "मकर संक्रांति"],
+    ["2026-03-04",  "Holi",               "होली"],
+    ["2026-03-20",  "Ugadi / Navratri",   "उगादि / नवरात्रि"],
+    ["2026-03-27",  "Rama Navami",        "राम नवमी"],
+    ["2026-03-31",  "Mahavir Jayanti",    "महावीर जयंती"],
+    ["2026-04-14",  "Tamil New Year",     "तमिल नव वर्ष"],
+    ["2026-04-20",  "Akshay Tritiya",     "अक्षय तृतीया"],
+    ["2026-08-15",  "Independence Day",   "स्वतंत्रता दिवस"],
+    ["2026-08-28",  "Raksha Bandhan",     "रक्षा बंधन"],
+    ["2026-09-08",  "Paryushan Prarambh", "पर्युषण पारंभ"],
+    ["2026-09-14",  "Ganesh Chaturthi",   "गणेश चतुर्थी"],
+    ["2026-09-15",  "Samvatsari",         "संवत्सरी"],
+    ["2026-10-11",  "Navratri",           "नवरात्रि"],
+    ["2026-10-20",  "Dussehra",           "दशहरा / विजयदशमी"],
+    ["2026-11-06",  "Dhanteras",          "धनतेरस"],
+    ["2026-11-08",  "Diwali",             "दीपावली"],
+    ["2026-12-25",  "Christmas",          "क्रिसमस"],
   ]
 };
 
-// ── MAIN CALCULATE ──
+function getFestName(f){
+  return LANG==="hi" ? f[2] : f[1];
+}
+
+// ══════════════════════════════════
+// MAIN CALCULATE
+// ══════════════════════════════════
+let gpsLat=null,gpsLon=null,userPickedDate=false;
+
+document.addEventListener("DOMContentLoaded",function(){
+  document.getElementById("date").addEventListener("change",function(){
+    userPickedDate=true; calculate();
+  });
+  let autoTimer=null;
+  document.getElementById("city").addEventListener("input",function(){
+    clearTimeout(autoTimer);
+    userPickedDate=false;
+    if(document.getElementById("city").value.trim().length>=3)
+      autoTimer=setTimeout(calculate,1500);
+  });
+});
+
 async function calculate(){
+  if(!LANG)return;
+  let t=T[LANG];
   let cityVal=document.getElementById("city").value.trim();
   let date=document.getElementById("date").value;
   if(!cityVal&&!gpsLat)return;
-  if(!date){
-    date=getPhoneDateStr();
-    document.getElementById("date").value=date;
-  }
+  if(!date){date=getPhoneDateStr();document.getElementById("date").value=date;}
 
-  document.getElementById("status").textContent="Calculating...";
+  document.getElementById("status").textContent=t.calculating;
   document.getElementById("output").innerHTML="";
 
   try{
     let lat,lon,tzName,cityName;
-
     if(cityVal){
-      let cityData=findCity(cityVal);
-      if(cityData){
-        lat=cityData.lat;lon=cityData.lon;tzName=cityData.tz;cityName=cityVal;
-      }else if(gpsLat){
-        lat=gpsLat;lon=gpsLon;tzName=guessTz(lat,lon);cityName=cityVal;
-      }else{
+      let cd=findCity(cityVal);
+      if(cd){lat=cd.lat;lon=cd.lon;tzName=cd.tz;cityName=cityVal;}
+      else if(gpsLat){lat=gpsLat;lon=gpsLon;tzName=guessTz(lat,lon);cityName=cityVal;}
+      else{
         try{
           let r=await fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(cityVal)+"&format=json&limit=1");
           let d=await r.json();
-          if(!d||d.length===0)throw new Error("City not found");
+          if(!d||d.length===0)throw new Error();
           lat=+d[0].lat;lon=+d[0].lon;tzName=guessTz(lat,lon);cityName=cityVal;
         }catch(e){
-          throw new Error("'"+cityVal+"' not found. Try: Mumbai, Delhi, London, Dubai");
+          throw new Error(LANG==="hi"?"'"+cityVal+"' नहीं मिला। मुंबई, दिल्ली, लंदन जैसे शहर आज़माएं":"'"+cityVal+"' not found. Try: Mumbai, Delhi, London");
         }
       }
-    }else{
-      lat=gpsLat;lon=gpsLon;tzName=guessTz(lat,lon);cityName="Your Location";
-    }
+    }else{lat=gpsLat;lon=gpsLon;tzName=guessTz(lat,lon);cityName=LANG==="hi"?"आपका स्थान":"Your Location";}
 
-    // Get UTC offset including DST
     let tz=getOffset(tzName,date);
-
-    // ── KEY FIX: Use CITY's local date not phone's date ──
     let cityDate=getCityDateStr(tz);
-
-    // Auto-update date to city's local date UNLESS user manually picked a date
-    // This ensures: Chennai=23 Mar, Ashburn=22 Mar automatically
-    // But if user picks a future/past date manually, respect their choice
-    if(!userPickedDate && cityDate!==date){
+    if(!userPickedDate&&cityDate!==date){
       date=cityDate;
       document.getElementById("date").value=date;
     }
 
-    // Current time in CITY
     let nowUTC=new Date();
     let nowCity=((nowUTC.getUTCHours()*60+nowUTC.getUTCMinutes()+tz*60)%1440+1440)%1440;
-
-    // Is current time before today's sunrise in this city?
-    // First get today's sun to check sunrise
     let sun=await getSun(lat,lon,date,tz);
-
     let isBeforeSunrise=nowCity<sun.sunrise;
-
-    // Next day sun times
-    let nextD=new Date(date+"T12:00:00Z");
-    nextD.setUTCDate(nextD.getUTCDate()+1);
-    let sun2=await getSun(lat,lon,nextD.toISOString().split("T")[0],tz);
-
-    // Previous day sun times — for current muhurat when before sunrise
-    let prevD=new Date(date+"T12:00:00Z");
-    prevD.setUTCDate(prevD.getUTCDate()-1);
-    let prevDateStr=prevD.toISOString().split("T")[0];
+    let next=new Date(date+"T12:00:00Z");next.setUTCDate(next.getUTCDate()+1);
+    let sun2=await getSun(lat,lon,next.toISOString().split("T")[0],tz);
+    let prev=new Date(date+"T12:00:00Z");prev.setUTCDate(prev.getUTCDate()-1);
+    let prevDateStr=prev.toISOString().split("T")[0];
     let sunPrev=await getSun(lat,lon,prevDateStr,tz);
 
     let wd=new Date(date+"T12:00:00Z").getUTCDay();
-    let daySeq=daySeqs[wd];
+    let daySeq=getDaySeqs(wd);
     let nightSeq=getNightSeq(daySeq);
     let daySeg=divide(sun.sunrise,sun.sunset);
     let nightSeg=divide(sun.sunset,sun2.sunrise+1440);
-
     let rahu=getPd(sun.sunrise,sun.sunset,rahuIdx[wd]);
     let yama=getPd(sun.sunrise,sun.sunset,yamaIdx[wd]);
     let kv=getPd(sun.sunrise,sun.sunset,kvIdx[wd]);
     let vv=getPd(sun.sunrise,sun.sunset,vvIdx[wd]);
     let kr=nightSeg[krIdx[wd]];
-
-    // isToday = viewing city's current date
     let isToday=(date===cityDate);
     let tzSign=tz>=0?"+":"";
 
@@ -404,51 +638,44 @@ async function calculate(){
     let festToday="";
     let yr=new Date(date+"T12:00:00Z").getFullYear();
     if(MY_FESTIVALS[yr]){
-      MY_FESTIVALS[yr].forEach(([fd,fn])=>{
-        if(fd===date)festToday+=(festToday?" | ":"")+fn;
+      MY_FESTIVALS[yr].forEach(f=>{
+        if(f[0]===date)festToday+=(festToday?" | ":"")+getFestName(f);
       });
     }
 
-    // ── BUILD OUTPUT ──
-    let dayName=new Date(date+"T12:00:00Z").toLocaleDateString("en-IN",{weekday:"long"});
-    let html="<h3>"+cityName+"</h3>";
+    let displayName=getDisplayName(cityName);
+    let dayName=new Date(date+"T12:00:00Z").toLocaleDateString(t.locale,{weekday:"long"});
+    let html="<h3>"+displayName+"</h3>";
     html+="<div style='color:#555;font-size:15px'>"+tzName+" (UTC"+tzSign+tz+"h)</div>";
-
-    // Date + Day + Festival on one line
     let dateLine="<b>"+date+"</b> &nbsp; <b>"+dayName+"</b>";
     if(festToday)dateLine+=" &nbsp;|&nbsp; <span style='font-weight:900;color:green'>"+festToday+"</span>";
     html+="<div style='font-size:18px;color:#111;margin:6px 0'>"+dateLine+"</div>";
-
-    html+="Sunrise: <b>"+format(sun.sunrise)+"</b> &nbsp;|&nbsp; Sunset: <b>"+format(sun.sunset)+"</b><br>";
-
-    // Rahu Yama KV VV KR on one line
+    html+=t.sunrise+": <b>"+format(sun.sunrise)+"</b> &nbsp;|&nbsp; "+t.sunset+": <b>"+format(sun.sunset)+"</b><br>";
     html+="<div style='font-size:16px;margin:6px 0;line-height:2'>";
-    html+="<span style='color:red;font-weight:bold'>Rahu</span> "+format(rahu[0])+"-"+format(rahu[1]);
-    html+=" &nbsp; <span style='color:red;font-weight:bold'>Yama</span> "+format(yama[0])+"-"+format(yama[1]);
-    html+=" &nbsp; <span style='color:red;font-weight:bold'>KV</span> "+format(kv[0])+"-"+format(kv[1]);
-    html+=" &nbsp; <span style='color:red;font-weight:bold'>VV</span> "+format(vv[0])+"-"+format(vv[1]);
-    html+=" &nbsp; <span style='color:red;font-weight:bold'>KR</span> "+format(kr[0])+"-"+format(kr[1]);
+    html+="<span style='color:red;font-weight:bold'>"+t.rahu+"</span> "+format(rahu[0])+"-"+format(rahu[1]);
+    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.yama+"</span> "+format(yama[0])+"-"+format(yama[1]);
+    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.kv+"</span> "+format(kv[0])+"-"+format(kv[1]);
+    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.vv+"</span> "+format(vv[0])+"-"+format(vv[1]);
+    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.kr+"</span> "+format(kr[0])+"-"+format(kr[1]);
     html+="</div>";
-    html+="<small style='color:#888'>All times in "+cityName+" local time</small>";
+    html+="<small style='color:#888'>"+t.allTimes+" "+displayName+" "+t.localTime+"</small>";
 
     // Best Muhurat
     let best=[];
     daySeg.forEach((s,i)=>{
       let n=daySeq[i];
-      if(!["Amrit","Shubh","Labh"].includes(n))return;
-      if(quality(n,s[0],rahu,yama,kv,vv,kr)==="BEST")
-        best.push(n+": "+format(s[0])+" - "+format(s[1]));
+      if(!getGood().includes(n))return;
+      if(quality(n,s[0],rahu,yama,kv,vv,kr)===t.qBest)
+        best.push(n+": "+format(s[0])+" - "+format(s[1])+t.bestSuffix);
     });
-    html+='<div class="box" style="border-color:green;background:#eaffea"><b>Best Muhurat</b><br>'+(best.length?best.join("<br>"):"None today")+"</div>";
+    html+='<div class="box" style="border-color:green;background:#eaffea"><b>'+t.bestTitle+'</b><br>'+(best.length?best.join("<br>"):t.noBest)+"</div>";
 
-    // ── CURRENT MUHURAT ──
+    // Current Muhurat
     if(isToday){
       let cur="",curQ="",curTime="",curNote="";
-
       if(isBeforeSunrise){
-        // After midnight, before sunrise → use YESTERDAY's night segments
         let prevWd=new Date(prevDateStr+"T12:00:00Z").getUTCDay();
-        let prevDaySeq=daySeqs[prevWd];
+        let prevDaySeq=getDaySeqs(prevWd);
         let prevNSeq=getNightSeq(prevDaySeq);
         let prevNSeg=divide(sunPrev.sunset,sun.sunrise+1440);
         let pRahu=getPd(sunPrev.sunrise,sunPrev.sunset,rahuIdx[prevWd]);
@@ -456,25 +683,18 @@ async function calculate(){
         let pKv=getPd(sunPrev.sunrise,sunPrev.sunset,kvIdx[prevWd]);
         let pVv=getPd(sunPrev.sunrise,sunPrev.sunset,vvIdx[prevWd]);
         let pKr=prevNSeg[krIdx[prevWd]];
-        let nowExt=nowCity+1440; // extend past midnight
+        let nowExt=nowCity+1440;
         prevNSeg.forEach((s,i)=>{
-          // Match segments that are past midnight (s[0]>=1440)
-          // OR segments that straddle midnight (s[0]<1440 but s[1]>1440)
-          let matches = false;
-          if(s[0]>=1440 && nowExt>=s[0] && nowExt<s[1]){
-            matches=true; // fully after midnight segment
-          }else if(s[0]<1440 && s[1]>1440 && nowExt>=s[0] && nowExt<s[1]){
-            matches=true; // segment straddling midnight
-          }
+          let matches=false;
+          if(s[0]>=1440&&nowExt>=s[0]&&nowExt<s[1])matches=true;
+          else if(s[0]<1440&&s[1]>1440&&nowExt>=s[0]&&nowExt<s[1])matches=true;
           if(matches){
-            cur=prevNSeq[i];
-            curQ=quality(cur,s[0],pRahu,pYama,pKv,pVv,pKr);
+            cur=prevNSeq[i];curQ=quality(cur,s[0],pRahu,pYama,pKv,pVv,pKr);
             curTime=format(s[0])+" - "+format(s[1]);
-            curNote="(Before sunrise — last night "+prevDateStr+")";
+            curNote=t.beforeSun+" "+prevDateStr;
           }
         });
       }else{
-        // Daytime or evening → use today's segments
         daySeg.forEach((s,i)=>{
           if(nowCity>=s[0]&&nowCity<s[1]){
             cur=daySeq[i];curQ=quality(cur,s[0],rahu,yama,kv,vv,kr);
@@ -494,104 +714,102 @@ async function calculate(){
           });
         }
       }
-
       html+='<div class="box" style="border-color:blue;background:#eef4ff">';
-      html+="<b>Current Muhurat in "+cityName+"</b>";
+      html+="<b>"+t.currentTitle+" "+displayName+"</b>";
       if(curNote)html+="<br><small style='color:#888'>"+curNote+"</small>";
-      html+="<br>"+(cur?cur+" &nbsp;"+curTime+" &nbsp;"+badge(curQ):"Unable to detect");
+      html+="<br>"+(cur?cur+" &nbsp;"+curTime+" &nbsp;"+badge(curQ):t.undetected);
       html+="</div>";
     }
 
-    // Day Table
-    html+="<h3>Day Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
+    html+="<h3>"+t.dayChog+"</h3><table><tr><th>#</th><th>"+t.tableTime+"</th><th>"+t.tableName+"</th><th>"+t.tableQual+"</th></tr>";
     daySeg.forEach((s,i)=>{
       let q=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
       let now=isToday&&!isBeforeSunrise&&nowCity>=s[0]&&nowCity<s[1];
       html+="<tr"+(now?' style="background:#fffde7;font-weight:bold"':"")+">";
-      html+="<td>"+(i+1)+"</td><td>"+format(s[0])+"–"+format(s[1])+"</td>";
-      html+="<td>"+daySeq[i]+(now?" ◀":"")+"</td><td>"+badge(q)+"</td></tr>";
+      html+="<td>"+(i+1)+"</td><td>"+format(s[0])+"–"+format(s[1])+"</td><td>"+daySeq[i]+(now?t.now:"")+"</td><td>"+badge(q)+"</td></tr>";
     });
     html+="</table>";
 
-    // Night Table
-    html+="<h3>Night Choghadiya</h3><table><tr><th>#</th><th>Time</th><th>Name</th><th>Quality</th></tr>";
+    html+="<h3>"+t.nightChog+"</h3><table><tr><th>#</th><th>"+t.tableTime+"</th><th>"+t.tableName+"</th><th>"+t.tableQual+"</th></tr>";
     nightSeg.forEach((s,i)=>{
       let q=quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr);
       let now=isToday&&!isBeforeSunrise&&s[0]<1440&&nowCity>=s[0]&&nowCity<Math.min(s[1],1440);
       html+="<tr"+(now?' style="background:#fffde7;font-weight:bold"':"")+">";
-      html+="<td>"+(i+1)+"</td><td>"+format(s[0])+"–"+format(s[1])+"</td>";
-      html+="<td>"+nightSeq[i]+(now?" ◀":"")+"</td><td>"+badge(q)+"</td></tr>";
+      html+="<td>"+(i+1)+"</td><td>"+format(s[0])+"–"+format(s[1])+"</td><td>"+nightSeq[i]+(now?t.now:"")+"</td><td>"+badge(q)+"</td></tr>";
     });
     html+="</table>";
 
     document.getElementById("output").innerHTML=html;
-    document.getElementById("status").textContent=cityName+" | "+tzName+" (UTC"+tzSign+tz+"h)";
+    document.getElementById("status").textContent=displayName+" | "+tzName+" (UTC"+tzSign+tz+"h)";
 
   }catch(err){
-    document.getElementById("status").textContent="Error: "+err.message;
+    document.getElementById("status").textContent=err.message;
     document.getElementById("output").innerHTML='<div style="color:red;padding:12px">'+err.message+'</div>';
-    console.error(err);
   }
 }
 
-// ── FESTIVAL CALENDAR ──
-const MONTH_NAMES=["January","February","March","April","May","June","July","August","September","October","November","December"];
-const DAY_NAMES_F=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-
+// ══════════════════════════════════
+// FESTIVAL CALENDAR
+// ══════════════════════════════════
 function toggleFestivals(){
   let box=document.getElementById("festBox");
   if(box.style.display==="none"){
+    let t=T[LANG];
     let year=new Date().getFullYear();
     let fests=MY_FESTIVALS[year]||[];
     let today=getPhoneDateStr();
     if(fests.length===0){
-      box.innerHTML="<h3>Festival Calendar</h3><p style='padding:12px'>No data for "+year+". Please update from Padmodaya calendar.</p>";
+      box.innerHTML="<h3>"+t.festTitle+"</h3><p style='padding:12px'>"+t.noFestData+" "+year+". "+t.festNote+"</p>";
       box.style.display="block";return;
     }
-    let html="<h3>Festival Calendar "+year+" — Jay Parshva Padmodaya</h3>";
-    html+='<table class="ftable"><tr><th>Date</th><th>Festival</th></tr>';
+    let months=t.months;
+    let days=t.days;
+    let html="<h3>"+t.festTitle+" "+year+"</h3>";
+    html+='<table class="ftable"><tr><th>'+t.tableTime+'</th><th>'+t.tableName+'</th></tr>';
     let lastMo="";
-    fests.forEach(([fd,fn])=>{
-      let mo=fd.substring(5,7);
+    fests.forEach(f=>{
+      let mo=f[0].substring(5,7);
       if(mo!==lastMo){
-        html+='<tr class="fmonth"><td colspan="2">'+MONTH_NAMES[parseInt(mo)-1]+" "+year+"</td></tr>";
+        html+='<tr class="fmonth"><td colspan="2">'+months[parseInt(mo)-1]+" "+year+"</td></tr>";
         lastMo=mo;
       }
-      let d=new Date(fd+"T12:00:00Z");
-      let label=DAY_NAMES_F[d.getUTCDay()]+", "+d.getUTCDate()+" "+MONTH_NAMES[d.getUTCMonth()].slice(0,3);
-      let isToday=fd===today;
-      html+='<tr class="'+(isToday?"ftoday":"")+'"><td>'+label+(isToday?" TODAY":"")+'</td><td>'+fn+'</td></tr>';
+      let d=new Date(f[0]+"T12:00:00Z");
+      let label=days[d.getUTCDay()]+", "+d.getUTCDate()+" "+months[d.getUTCMonth()];
+      let isToday=f[0]===today;
+      html+='<tr class="'+(isToday?"ftoday":"")+'"><td>'+label+(isToday?t.todayLabel:"")+'</td>';
+      html+='<td class="fest-name">'+getFestName(f)+'</td></tr>';
     });
     html+="</table>";
-    box.innerHTML=html;
-    box.style.display="block";
-  }else{
-    box.style.display="none";
-  }
+    box.innerHTML=html;box.style.display="block";
+  }else{box.style.display="none";}
 }
 
-// ── AUTO DETECT LOCATION ──
-window.addEventListener("load",function(){
+// ══════════════════════════════════
+// AUTO DETECT + INIT
+// ══════════════════════════════════
+function initApp(){
+  document.getElementById("date").value=getPhoneDateStr();
+  applyLang();
+
   if(!navigator.geolocation){
     gpsLat=13.0827;gpsLon=80.2707;
-    document.getElementById("city").value="Chennai";
-    document.getElementById("status").textContent="Using default: Chennai";
+    document.getElementById("city").value=LANG==="hi"?"चेन्नई":"Chennai";
+    document.getElementById("status").textContent=T[LANG].defaultCity;
     calculate();return;
   }
   navigator.geolocation.getCurrentPosition(
     async function(pos){
-      gpsLat=pos.coords.latitude;
-      gpsLon=pos.coords.longitude;
-      // Find nearest city from database
+      gpsLat=pos.coords.latitude;gpsLon=pos.coords.longitude;
       let best="",bestDist=999;
       for(let k in CITIES){
         let c=CITIES[k];
         let dist=Math.abs(c.lat-gpsLat)+Math.abs(c.lon-gpsLon);
         if(dist<bestDist){bestDist=dist;best=k;}
       }
-      let cityName=bestDist<2?best.charAt(0).toUpperCase()+best.slice(1):"Your Location";
-      document.getElementById("city").value=cityName;
-      document.getElementById("status").textContent="Detected: "+cityName;
+      let cityName=bestDist<2?best:"";
+      let displayName=LANG==="hi"?(HINDI_CITIES[cityName]||cityName||""):cityName;
+      document.getElementById("city").value=displayName||cityName;
+      document.getElementById("status").textContent=T[LANG].detected+(displayName||cityName);
       calculate();
     },
     async function(){
@@ -599,18 +817,38 @@ window.addEventListener("load",function(){
         let r=await fetch("https://ipapi.co/json/");
         let d=await r.json();
         gpsLat=d.latitude;gpsLon=d.longitude;
-        document.getElementById("city").value=d.city||"Chennai";
-        document.getElementById("status").textContent="IP Location: "+(d.city||"Chennai");
+        let city=d.city||"Chennai";
+        let displayCity=LANG==="hi"?(HINDI_CITIES[city.toLowerCase()]||city):city;
+        document.getElementById("city").value=displayCity;
+        document.getElementById("status").textContent=T[LANG].ipLocation+displayCity;
         calculate();
       }catch(e){
         gpsLat=13.0827;gpsLon=80.2707;
-        document.getElementById("city").value="Chennai";
-        document.getElementById("status").textContent="Using default: Chennai";
+        document.getElementById("city").value=LANG==="hi"?"चेन्नई":"Chennai";
+        document.getElementById("status").textContent=T[LANG].defaultCity;
         calculate();
       }
     }
   );
+}
+
+// ── On page load — check if language already chosen ──
+window.addEventListener("load",function(){
+  if(LANG){
+    // Language already saved — skip selector
+    document.getElementById("langScreen").style.display="none";
+    document.getElementById("app").style.display="block";
+    initApp();
+  }
+  // else show language selector (already visible by default)
 });
+
+// Service Worker
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js")
+    .then(()=>console.log("SW registered"))
+    .catch(e=>console.log("SW failed:",e));
+}
 
 </script>
 </body>
