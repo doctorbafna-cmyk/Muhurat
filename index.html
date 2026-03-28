@@ -87,8 +87,8 @@ th{background:#f0f0f0;}
 #festBox{display:none;margin-top:12px;background:#fff;border:2px solid #ccc;border-radius:8px;overflow:hidden;}
 #festBox h3{background:#ff8c00;color:#fff;margin:0;padding:12px 16px;font-size:1.1rem;}
 .ftable{width:100%;border-collapse:collapse;}
-.ftable th{background:#ffe0b2;padding:8px 12px;font-size:1rem;text-align:left;border-bottom:2px solid #ccc;}
-.ftable td{padding:8px 12px;font-size:1rem;font-weight:bold;border-bottom:1px solid #eee;color:#111;}
+.ftable th{background:#ffe0b2;padding:10px 14px;font-size:1.2rem;font-weight:900;text-align:center;border-bottom:2px solid #ccc;}
+.ftable td{padding:10px 14px;font-size:1.05rem;font-weight:bold;border-bottom:1px solid #eee;color:#111;vertical-align:middle;text-align:center;}
 .ftable tr:nth-child(even) td{background:#fff8f0;}
 .fmonth td{background:#ff8c00!important;color:#fff!important;font-weight:900;font-size:1.1rem;}
 .ftoday td{background:#fff9c4!important;font-weight:900;}
@@ -254,6 +254,12 @@ function applyLang(){
 // ══════════════════════════════════
 // UTILITIES
 // ══════════════════════════════════
+// Capitalize first letter of each word
+function capitalize(str){
+  if(!str) return str;
+  return str.split(" ").map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
+}
+
 function getPhoneDateStr(){
   let n=new Date();
   return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0");
@@ -643,7 +649,7 @@ async function calculate(){
       });
     }
 
-    let displayName=getDisplayName(cityName);
+    let displayName=capitalize(getDisplayName(cityName));
     let dayName=new Date(date+"T12:00:00Z").toLocaleDateString(t.locale,{weekday:"long"});
     let html="<h3>"+displayName+"</h3>";
     html+="<div style='color:#555;font-size:15px'>"+tzName+" (UTC"+tzSign+tz+"h)</div>";
@@ -651,13 +657,6 @@ async function calculate(){
     if(festToday)dateLine+=" &nbsp;|&nbsp; <span style='font-weight:900;color:green'>"+festToday+"</span>";
     html+="<div style='font-size:18px;color:#111;margin:6px 0'>"+dateLine+"</div>";
     html+=t.sunrise+": <b>"+format(sun.sunrise)+"</b> &nbsp;|&nbsp; "+t.sunset+": <b>"+format(sun.sunset)+"</b><br>";
-    html+="<div style='font-size:16px;margin:6px 0;line-height:2'>";
-    html+="<span style='color:red;font-weight:bold'>"+t.rahu+"</span> "+format(rahu[0])+"-"+format(rahu[1]);
-    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.yama+"</span> "+format(yama[0])+"-"+format(yama[1]);
-    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.kv+"</span> "+format(kv[0])+"-"+format(kv[1]);
-    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.vv+"</span> "+format(vv[0])+"-"+format(vv[1]);
-    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.kr+"</span> "+format(kr[0])+"-"+format(kr[1]);
-    html+="</div>";
     html+="<small style='color:#888'>"+t.allTimes+" "+displayName+" "+t.localTime+"</small>";
 
     // Best Muhurat
@@ -721,6 +720,15 @@ async function calculate(){
       html+="</div>";
     }
 
+    // Rahu Yama KV VV KR — shown after Current Muhurat
+    html+="<div style='font-size:16px;margin:10px 0;line-height:2;padding:10px;background:#fff3f3;border-radius:8px;border:1px solid #ffcccc'>";
+    html+="<span style='color:red;font-weight:bold'>"+t.rahu+"</span> "+format(rahu[0])+"-"+format(rahu[1]);
+    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.yama+"</span> "+format(yama[0])+"-"+format(yama[1]);
+    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.kv+"</span> "+format(kv[0])+"-"+format(kv[1]);
+    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.vv+"</span> "+format(vv[0])+"-"+format(vv[1]);
+    html+=" &nbsp; <span style='color:red;font-weight:bold'>"+t.kr+"</span> "+format(kr[0])+"-"+format(kr[1]);
+    html+="</div>";
+
     html+="<h3>"+t.dayChog+"</h3><table><tr><th>#</th><th>"+t.tableTime+"</th><th>"+t.tableName+"</th><th>"+t.tableQual+"</th></tr>";
     daySeg.forEach((s,i)=>{
       let q=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
@@ -765,7 +773,9 @@ function toggleFestivals(){
     let months=t.months;
     let days=t.days;
     let html="<h3>"+t.festTitle+" "+year+"</h3>";
-    html+='<table class="ftable"><tr><th>'+t.tableTime+'</th><th>'+t.tableName+'</th></tr>';
+    let festDateHeader = LANG==="hi" ? "तारीख" : "Date";
+    let festNameHeader = LANG==="hi" ? "पर्व"  : "Festival";
+    html+='<table class="ftable"><tr><th style="font-size:1.15rem;font-weight:900">'+festDateHeader+'</th><th style="font-size:1.15rem;font-weight:900">'+festNameHeader+'</th></tr>';
     let lastMo="";
     fests.forEach(f=>{
       let mo=f[0].substring(5,7);
@@ -807,9 +817,9 @@ function initApp(){
         if(dist<bestDist){bestDist=dist;best=k;}
       }
       let cityName=bestDist<2?best:"";
-      let displayName=LANG==="hi"?(HINDI_CITIES[cityName]||cityName||""):cityName;
-      document.getElementById("city").value=displayName||cityName;
-      document.getElementById("status").textContent=T[LANG].detected+(displayName||cityName);
+      let displayName=LANG==="hi"?(HINDI_CITIES[cityName]||cityName||""):capitalize(cityName);
+      document.getElementById("city").value=displayName||capitalize(cityName);
+      document.getElementById("status").textContent=T[LANG].detected+(displayName||capitalize(cityName));
       calculate();
     },
     async function(){
@@ -818,7 +828,7 @@ function initApp(){
         let d=await r.json();
         gpsLat=d.latitude;gpsLon=d.longitude;
         let city=d.city||"Chennai";
-        let displayCity=LANG==="hi"?(HINDI_CITIES[city.toLowerCase()]||city):city;
+        let displayCity=LANG==="hi"?(HINDI_CITIES[city.toLowerCase()]||city):capitalize(city);
         document.getElementById("city").value=displayCity;
         document.getElementById("status").textContent=T[LANG].ipLocation+displayCity;
         calculate();
