@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 <meta charset="UTF-8">
@@ -18,60 +19,60 @@ body{font-family:Arial;background:#fafafa;min-height:100vh;}
 
 /* ── Language Selector Screen ── */
 #langScreen{
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;min-height:100vh;
-  background:linear-gradient(135deg,#fff3e0,#fafafa);
-  padding:30px 20px;
+display:flex;flex-direction:column;align-items:center;
+justify-content:center;min-height:100vh;
+background:linear-gradient(135deg,#fff3e0,#fafafa);
+padding:30px 20px;
 }
 #langScreen .logo{
-  font-size:4rem;margin-bottom:10px;
+font-size:4rem;margin-bottom:10px;
 }
 #langScreen h1{
-  font-size:1.6rem;font-weight:900;color:#ff8c00;
-  text-align:center;margin-bottom:6px;letter-spacing:1px;
+font-size:1.6rem;font-weight:900;color:#ff8c00;
+text-align:center;margin-bottom:6px;letter-spacing:1px;
 }
 #langScreen h2{
-  font-size:1.3rem;font-weight:900;color:#333;
-  text-align:center;margin-bottom:8px;
+font-size:1.3rem;font-weight:900;color:#333;
+text-align:center;margin-bottom:8px;
 }
 #langScreen p{
-  font-size:1rem;color:#666;text-align:center;
-  margin-bottom:30px;line-height:1.5;
+font-size:1rem;color:#666;text-align:center;
+margin-bottom:30px;line-height:1.5;
 }
 .lang-btn{
-  width:100%;max-width:320px;padding:18px;margin:10px 0;
-  border:none;border-radius:14px;font-size:1.3rem;
-  font-weight:900;cursor:pointer;letter-spacing:1px;
-  transition:transform .1s,box-shadow .1s;
+width:100%;max-width:320px;padding:18px;margin:10px 0;
+border:none;border-radius:14px;font-size:1.3rem;
+font-weight:900;cursor:pointer;letter-spacing:1px;
+transition:transform .1s,box-shadow .1s;
 }
 .lang-btn:active{transform:scale(0.97);}
 .btn-english{
-  background:#ff8c00;color:#fff;
-  box-shadow:0 4px 12px rgba(255,140,0,.4);
+background:#ff8c00;color:#fff;
+box-shadow:0 4px 12px rgba(255,140,0,.4);
 }
 .btn-hindi{
-  background:#138808;color:#fff;
-  box-shadow:0 4px 12px rgba(19,136,8,.4);
+background:#138808;color:#fff;
+box-shadow:0 4px 12px rgba(19,136,8,.4);
 }
 .lang-note{
-  font-size:0.85rem;color:#999;text-align:center;
-  margin-top:20px;
+font-size:0.85rem;color:#999;text-align:center;
+margin-top:20px;
 }
 
 /* ── Main App ── */
 #app{display:none;}
 .app-header{
-  background:#ff8c00;color:#fff;
-  padding:8px 12px;
-  display:flex;justify-content:space-between;align-items:center;
+background:#ff8c00;color:#fff;
+padding:8px 12px;
+display:flex;justify-content:space-between;align-items:center;
 }
 .app-header h2{font-size:1rem;font-weight:900;}
 .lang-switch{
-  font-size:0.8rem;font-weight:700;
-  background:rgba(255,255,255,.25);
-  border:1px solid rgba(255,255,255,.5);
-  color:#fff;padding:4px 10px;border-radius:20px;
-  cursor:pointer;
+font-size:0.8rem;font-weight:700;
+background:rgba(255,255,255,.25);
+border:1px solid rgba(255,255,255,.5);
+color:#fff;padding:4px 10px;border-radius:20px;
+cursor:pointer;
 }
 .app-body{max-width:720px;margin:0 auto;padding:10px;}
 
@@ -94,10 +95,12 @@ th{background:#f0f0f0;}
 .ftoday td{background:#fff9c4!important;font-weight:900;}
 .fest-name{color:green!important;font-weight:900;font-size:1.15rem;}
 </style>
+
 </head>
 <body>
 
 <!-- ── LANGUAGE SELECTOR (shown on first open) ── -->
+
 <div id="langScreen">
   <div class="logo">🪔</div>
   <h1>Muhurat Calculator</h1>
@@ -119,6 +122,7 @@ th{background:#f0f0f0;}
 </div>
 
 <!-- ── MAIN APP ── -->
+
 <div id="app">
   <div class="app-header">
     <h2 id="appTitle">Universal Muhurat Calculator</h2>
@@ -173,6 +177,13 @@ const T = {
     festNote:    "Please update from Padmodaya calendar",
     todayLabel:  " ⭐ TODAY",
     rahu:"Rahu", yama:"Yama", kv:"KV", vv:"VV", kr:"KR",
+    navkarsi:"Navkarsi",
+    porsi:"Porsi",
+    tithi:"Tithi",
+    shukla:"Shukla",
+    krishna:"Krishna",
+    tithiApprox:"(approximate)",
+    tithiNames:["Pratipada","Dvitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dvadashi","Trayodashi","Chaturdashi","Purnima","Pratipada","Dvitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dvadashi","Trayodashi","Chaturdashi","Amavasya"],
     chogNames:   ["Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg"],
     qBest:"BEST", qGood:"GOOD", qInauspicious:"Inauspicious",
     qRahu:"RAHU", qYama:"YAMA", qKV:"Kaal Vela", qVV:"Vaar Vela", qKR:"Kaal Ratri",
@@ -214,6 +225,13 @@ const T = {
     festNote:    "कृपया पद्मोदय कैलेंडर से अपडेट करें",
     todayLabel:  " ⭐ आज",
     rahu:"राहु", yama:"यम", kv:"काल वेला", vv:"वार वेला", kr:"काल रात्रि",
+    navkarsi:"नवकारसी",
+    porsi:"पोरसी",
+    tithi:"तिथि",
+    shukla:"शुक्ल",
+    krishna:"कृष्ण",
+    tithiApprox:"(अनुमानित)",
+    tithiNames:["प्रतिपदा","द्वितीया","तृतीया","चतुर्थी","पंचमी","षष्ठी","सप्तमी","अष्टमी","नवमी","दशमी","एकादशी","द्वादशी","त्रयोदशी","चतुर्दशी","पूर्णिमा","प्रतिपदा","द्वितीया","तृतीया","चतुर्थी","पंचमी","षष्ठी","सप्तमी","अष्टमी","नवमी","दशमी","एकादशी","द्वादशी","त्रयोदशी","चतुर्दशी","अमावस्या"],
     chogNames:   ["उद्वेग","चर","लाभ","अमृत","काल","शुभ","रोग","उद्वेग"],
     qBest:"सर्वोत्तम", qGood:"उत्तम", qInauspicious:"अशुभ",
     qRahu:"राहु", qYama:"यम", qKV:"काल वेला", qVV:"वार वेला", qKR:"काल रात्रि",
@@ -564,6 +582,39 @@ function getFestName(f){
 }
 
 // ══════════════════════════════════
+// TITHI CALCULATION (Jain/Hindu Lunar Day)
+// Accurate to within 1 tithi — calculated at sunrise time
+// ══════════════════════════════════
+function getTithiNumber(dateStr, sunriseMins, tzOffset){
+  const [y,m,d]=dateStr.split("-").map(Number);
+  const sunriseUTC=(sunriseMins - tzOffset*60)/1440;
+  let y2=y,m2=m;
+  if(m2<=2){y2--;m2+=12;}
+  const A=Math.floor(y2/100),B=2-A+Math.floor(A/4);
+  const JD=Math.floor(365.25*(y2+4716))+Math.floor(30.6001*(m2+1))+d+B-1524.5+sunriseUTC;
+  const T=(JD-2451545.0)/36525;
+  const R=Math.PI/180;
+  const L0=((280.46646+36000.76983*T)%360+360)%360;
+  const M=((357.52911+35999.05029*T)*R);
+  const C=(1.914602-0.004817*T)*Math.sin(M)+(0.019993-0.000101*T)*Math.sin(2*M);
+  const sunLon=((L0+C)%360+360)%360;
+  const Lm=((218.3164477+481267.88123421*T)%360+360)%360;
+  const Mm=((134.9633964+477198.8676313*T)%360+360)%360*R;
+  const D=((297.8501921+445267.1114034*T)%360+360)%360*R;
+  const F=((93.2720950+483202.0175233*T)%360+360)%360*R;
+  let moonLon=Lm
+    +6.289*Math.sin(Mm)-1.274*Math.sin(2*D-Mm)+0.658*Math.sin(2*D)
+    -0.186*Math.sin(M)-0.059*Math.sin(2*D-2*Mm)
+    -0.057*Math.sin(2*D-Mm+M)+0.053*Math.sin(2*D+Mm)
+    +0.046*Math.sin(2*D-M)+0.041*Math.sin(Mm-M)
+    -0.035*Math.sin(D)-0.031*Math.sin(Mm+M)
+    -0.015*Math.sin(2*F-2*D)+0.011*Math.sin(2*D-2*Mm);
+  moonLon=((moonLon%360)+360)%360;
+  const elongation=((moonLon-sunLon)%360+360)%360;
+  return Math.floor(elongation/12)+1;
+}
+
+// ══════════════════════════════════
 // MAIN CALCULATE
 // ══════════════════════════════════
 let gpsLat=null,gpsLon=null,userPickedDate=false;
@@ -651,13 +702,35 @@ async function calculate(){
 
     let displayName=capitalize(getDisplayName(cityName));
     let dayName=new Date(date+"T12:00:00Z").toLocaleDateString(t.locale,{weekday:"long"});
+
+    // Calculate Tithi at sunrise
+    let tithiNum  = getTithiNumber(date, sun.sunrise, tz);
+    let tithiName = t.tithiNames[tithiNum-1];
+    let paksha    = tithiNum<=15 ? t.shukla : t.krishna;
+
     let html="<h3>"+displayName+"</h3>";
     html+="<div style='color:#555;font-size:15px'>"+tzName+" (UTC"+tzSign+tz+"h)</div>";
+
+    // Date + Day + Tithi on one line
     let dateLine="<b>"+date+"</b> &nbsp; <b>"+dayName+"</b>";
+    dateLine+=" &nbsp;|&nbsp; <span style='color:#6b3fa0;font-weight:900'>"+paksha+" "+tithiName+"</span>";
     if(festToday)dateLine+=" &nbsp;|&nbsp; <span style='font-weight:900;color:green'>"+festToday+"</span>";
     html+="<div style='font-size:18px;color:#111;margin:6px 0'>"+dateLine+"</div>";
+
     html+=t.sunrise+": <b>"+format(sun.sunrise)+"</b> &nbsp;|&nbsp; "+t.sunset+": <b>"+format(sun.sunset)+"</b><br>";
-    html+="<small style='color:#888'>"+t.allTimes+" "+displayName+" "+t.localTime+"</small>";
+
+    // Navkarsi and Porsi
+    let dayDuration = sun.sunset - sun.sunrise;
+    let navkarsiTime = sun.sunrise + 48;
+    let porsiTime    = sun.sunrise + (dayDuration / 4);
+
+    html+="<div style='font-size:17px;font-weight:bold;margin:6px 0;color:#1a5c99'>";
+    html+="<span style='color:#1a5c99;font-weight:900'>"+t.navkarsi+"</span>: <b>"+format(navkarsiTime)+"</b>";
+    html+=" &nbsp;|&nbsp; ";
+    html+="<span style='color:#1a5c99;font-weight:900'>"+t.porsi+"</span>: <b>"+format(porsiTime)+"</b>";
+    html+="</div>";
+
+    html+="<small style='color:#888'>"+t.allTimes+" "+displayName+" "+t.localTime+" &nbsp;|&nbsp; "+t.tithi+": "+t.tithiApprox+"</small>";
 
     // Best Muhurat
     let best=[];
@@ -861,5 +934,6 @@ if("serviceWorker" in navigator){
 }
 
 </script>
+
 </body>
 </html>
