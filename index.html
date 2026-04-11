@@ -1,893 +1,445 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Muhurat Calculator / मुहूर्त कैलकुलेटर</title>
+<title>Muhurat Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/png" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Muhurat">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ff8c00">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:Arial;background:#fafafa;min-height:100vh;}
-#langScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#fff3e0,#fafafa);padding:30px 20px;}
-#langScreen .logo{font-size:4rem;margin-bottom:10px;}
-#langScreen h1{font-size:1.6rem;font-weight:900;color:#ff8c00;text-align:center;margin-bottom:6px;letter-spacing:1px;}
-#langScreen h2{font-size:1.3rem;font-weight:900;color:#333;text-align:center;margin-bottom:8px;}
-#langScreen p{font-size:1rem;color:#666;text-align:center;margin-bottom:30px;line-height:1.5;}
-.lang-btn{width:100%;max-width:320px;padding:18px;margin:10px 0;border:none;border-radius:14px;font-size:1.3rem;font-weight:900;cursor:pointer;letter-spacing:1px;transition:transform .1s,box-shadow .1s;}
-.lang-btn:active{transform:scale(0.97);}
-.btn-english{background:#ff8c00;color:#fff;box-shadow:0 4px 12px rgba(255,140,0,.4);}
-.btn-hindi{background:#138808;color:#fff;box-shadow:0 4px 12px rgba(19,136,8,.4);}
-.lang-note{font-size:0.85rem;color:#999;text-align:center;margin-top:20px;}
-#app{display:none;}
-.app-header{background:#ff8c00;color:#fff;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;}
-.app-header h2{font-size:1rem;font-weight:900;}
-.lang-switch{font-size:0.8rem;font-weight:700;background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.5);color:#fff;padding:4px 10px;border-radius:20px;cursor:pointer;}
-.app-body{max-width:720px;margin:0 auto;padding:10px;}
-input,button{padding:12px;margin:6px 0;width:100%;font-size:17px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;}
-button{background:#ff8c00;color:white;font-weight:bold;border:none;cursor:pointer;}
-button:hover{background:#e07800;}
-table{border-collapse:collapse;width:100%;margin-top:15px;background:white;}
-th,td{border:1px solid #ccc;padding:8px;text-align:center;font-size:16px;}
-th{background:#f0f0f0;}
-.box{margin-top:15px;padding:12px;border:2px solid;border-radius:6px;}
-#status{font-size:14px;color:#666;text-align:center;padding:4px;}
-#festBox{display:none;margin-top:12px;background:#fff;border:2px solid #ccc;border-radius:8px;overflow:hidden;}
-#festBox h3{background:#ff8c00;color:#fff;margin:0;padding:12px 16px;font-size:1.1rem;}
-.ftable{width:100%;border-collapse:collapse;}
-.ftable th{background:#ffe0b2;padding:10px 14px;font-size:1.2rem;font-weight:900;text-align:center;border-bottom:2px solid #ccc;}
-.ftable td{padding:10px 14px;font-size:1.05rem;font-weight:bold;border-bottom:1px solid #eee;color:#111;vertical-align:middle;text-align:center;}
-.ftable tr:nth-child(even) td{background:#fff8f0;}
-.fmonth td{background:#ff8c00!important;color:#fff!important;font-weight:900;font-size:1.1rem;}
-.ftoday td{background:#fff9c4!important;font-weight:900;}
-.fest-name{color:green!important;font-weight:900;font-size:1.15rem;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#fafafa;min-height:100vh}
+#langScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#fff3e0,#fafafa);padding:30px 20px}
+.logo{font-size:4rem;margin-bottom:10px;text-align:center}
+#langScreen h1{font-size:1.6rem;font-weight:900;color:#ff8c00;text-align:center;margin-bottom:6px}
+#langScreen h2{font-size:1.3rem;font-weight:900;color:#333;text-align:center;margin-bottom:8px}
+#langScreen p{font-size:1rem;color:#666;text-align:center;margin-bottom:30px;line-height:1.5}
+.lang-btn{width:100%;max-width:320px;padding:18px;margin:10px 0;border:none;border-radius:14px;font-size:1.3rem;font-weight:900;cursor:pointer;display:block}
+.btn-en{background:#ff8c00;color:#fff;box-shadow:0 4px 12px rgba(255,140,0,.4)}
+.btn-hi{background:#138808;color:#fff;box-shadow:0 4px 12px rgba(19,136,8,.4)}
+.lang-note{font-size:.85rem;color:#999;text-align:center;margin-top:20px}
+#app{display:none}
+.hdr{background:#ff8c00;color:#fff;padding:8px 12px;display:flex;justify-content:space-between;align-items:center}
+.hdr h2{font-size:1rem;font-weight:900}
+.lsw{font-size:.8rem;font-weight:700;background:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.5);color:#fff;padding:4px 10px;border-radius:20px;cursor:pointer;width:auto}
+.bdy{max-width:720px;margin:0 auto;padding:10px}
+input,button{padding:12px;margin:6px 0;width:100%;font-size:17px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box}
+button{background:#ff8c00;color:#fff;font-weight:bold;border:none;cursor:pointer}
+button:hover{background:#e07800}
+table{border-collapse:collapse;width:100%;margin-top:15px;background:#fff}
+th,td{border:1px solid #ccc;padding:8px;text-align:center;font-size:16px}
+th{background:#f0f0f0}
+.box{margin-top:15px;padding:12px;border:2px solid;border-radius:6px}
+#sts{font-size:14px;color:#666;text-align:center;padding:4px}
+#fb{display:none;margin-top:12px;background:#fff;border:2px solid #ccc;border-radius:8px;overflow:hidden}
+#fb h3{background:#ff8c00;color:#fff;margin:0;padding:12px 16px;font-size:1.1rem}
+.ft{width:100%;border-collapse:collapse}
+.ft th{background:#ffe0b2;padding:10px 14px;font-size:1.1rem;font-weight:900;text-align:center;border-bottom:2px solid #ccc}
+.ft td{padding:10px 14px;font-size:1rem;font-weight:bold;border-bottom:1px solid #eee;color:#111;vertical-align:middle;text-align:center}
+.ft tr:nth-child(even) td{background:#fff8f0}
+.fm td{background:#ff8c00!important;color:#fff!important;font-weight:900}
+.ftoday td{background:#fff9c4!important;font-weight:900}
+.fn{color:green!important;font-weight:900;font-size:1.1rem}
 </style>
 </head>
 <body>
 
 <div id="langScreen">
-  <div class="logo">🪔</div>
+  <div class="logo">&#x1F54E;</div>
   <h1>Muhurat Calculator</h1>
   <h2>मुहूर्त कैलकुलेटर</h2>
   <p>Choose your language<br>अपनी भाषा चुनें</p>
-  <button class="lang-btn btn-english" onclick="setLang('en')">🇬🇧 &nbsp; English</button>
-  <button class="lang-btn btn-hindi"   onclick="setLang('hi')">🇮🇳 &nbsp; हिंदी</button>
+  <button class="lang-btn btn-en" onclick="setLang('en')">&#x1F1EC;&#x1F1E7; &nbsp; English</button>
+  <button class="lang-btn btn-hi" onclick="setLang('hi')">&#x1F1EE;&#x1F1F3; &nbsp; हिंदी</button>
   <p class="lang-note">Your choice will be remembered<br>आपकी पसंद याद रखी जाएगी</p>
 </div>
 
 <div id="app">
-  <div class="app-header">
-    <h2 id="appTitle">Universal Muhurat Calculator</h2>
-    <button class="lang-switch" onclick="changeLang()">🌐 भाषा / Language</button>
+  <div class="hdr">
+    <h2 id="appTitle">Muhurat Calculator</h2>
+    <button class="lsw" onclick="changeLang()">&#x1F310; Language</button>
   </div>
-  <div class="app-body">
+  <div class="bdy">
     <input id="city" placeholder="Enter City Name">
     <input id="date" type="date">
-    <div id="status">Detecting location...</div>
+    <div id="sts">Ready</div>
     <button id="calcBtn" onclick="calculate()">Calculate</button>
-    <button id="festBtn" onclick="toggleFestivals()">🪔 Festival Calendar</button>
-    <div id="festBox"></div>
-    <div id="output"></div>
+    <button id="festBtn" onclick="toggleFest()">&#x1F54E; Festival Calendar</button>
+    <div id="fb"></div>
+    <div id="out"></div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════
-// LANGUAGE SYSTEM
-// ══════════════════════════════════════════════════════════
-let LANG = localStorage.getItem("muhurat_lang") || null;
 
-const T = {
-  en: {
+// Safe localStorage
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+
+var LANG = lsGet('muhurat_lang') || null;
+
+// ── Translations ──────────────────────────────────────────
+var TN_EN = ["Pratipada","Dvitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dvadashi","Trayodashi","Chaturdashi","Purnima","Pratipada","Dvitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dvadashi","Trayodashi","Chaturdashi","Amavasya"];
+var TN_HI = ["प्रतिपदा","द्वितीया","तृतीया","चतुर्थी","पंचमी","षष्ठी","सप्तमी","अष्टमी","नवमी","दशमी","एकादशी","द्वादशी","त्रयोदशी","चतुर्दशी","पूर्णिमा","प्रतिपदा","द्वितीया","तृतीया","चतुर्थी","पंचमी","षष्ठी","सप्तमी","अष्टमी","नवमी","दशमी","एकादशी","द्वादशी","त्रयोदशी","चतुर्दशी","अमावस्या"];
+var MONTHS_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+var DAYS_EN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+var MONTHS_HI = ["जनवरी","फरवरी","मार्च","अप्रैल","मई","जून","जुलाई","अगस्त","सितंबर","अक्टूबर","नवंबर","दिसंबर"];
+var DAYS_HI = ["रवि","सोम","मंगल","बुध","गुरु","शुक्र","शनि"];
+
+var TX = {
+  en:{
     appTitle:"Universal Muhurat Calculator",
     placeholder:"Enter City Name",
     calcBtn:"Calculate",
-    festBtn:"🪔 Festival Calendar",
-    detecting:"Detecting your location...",
+    festBtn:"\u1F54E Festival Calendar",
+    detecting:"Detecting location...",
     calculating:"Calculating...",
     detected:"Detected: ",
-    ipLocation:"IP Location: ",
-    defaultCity:"Using default: Chennai",
+    ipLoc:"IP Location: ",
+    defCity:"Using default: Chennai",
     sunrise:"Sunrise",sunset:"Sunset",
     allTimes:"All times in",localTime:"local time",
-    bestTitle:"⭐ Best Muhurat",
-    noBest:"None today",
-    currentTitle:"Current Muhurat in",
-    undetected:"Unable to detect",
-    beforeSun:"Before sunrise — last night",
+    bestTitle:"\u2B50 Best Muhurat",noBest:"None today",
+    curTitle:"Current Muhurat in",undetected:"Unable to detect",
+    beforeSun:"Before sunrise",
     dayChog:"Day Choghadiya",nightChog:"Night Choghadiya",
-    tableTime:"Time",tableName:"Name",tableQual:"Quality",
-    now:" ◀ NOW",
-    festTitle:"Festival Calendar",
-    noFestData:"No festival data for",
-    festNote:"Please update from Padmodaya calendar",
-    todayLabel:" ⭐ TODAY",
+    tTime:"Time",tName:"Name",tQual:"Quality",now:" \u25C4 NOW",
+    festTitle:"Festival Calendar",noFestData:"No data for",
+    festNote:"Update from Padmodaya calendar",today:" \u2B50 TODAY",
     rahu:"Rahu",yama:"Yama",kv:"KV",vv:"VV",kr:"KR",
     navkarsi:"Navkarsi",porsi:"Porsi",
-    tithi:"Tithi",shukla:"Shukla",krishna:"Krishna",
-    tithiApprox:"(approximate)",
-    // 30 tithi names: index 0=Shukla Pratipada … 14=Purnima, 15=Krishna Pratipada … 29=Amavasya
-    tithiNames:["Pratipada","Dvitiya","Tritiya","Chaturthi","Panchami","Shashthi",
-      "Saptami","Ashtami","Navami","Dashami","Ekadashi","Dvadashi","Trayodashi",
-      "Chaturdashi","Purnima","Pratipada","Dvitiya","Tritiya","Chaturthi","Panchami",
-      "Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dvadashi",
-      "Trayodashi","Chaturdashi","Amavasya"],
-    qBest:"BEST",qGood:"GOOD",qInauspicious:"Inauspicious",
+    then:"then",
+    qBest:"BEST",qGood:"GOOD",qBad:"Inauspicious",
     qRahu:"RAHU",qYama:"YAMA",qKV:"Kaal Vela",qVV:"Vaar Vela",qKR:"Kaal Ratri",
-    badgeBest:'<span style="color:green;font-weight:bold">BEST ✅</span>',
-    badgeGood:'<span style="color:orange;font-weight:bold">GOOD</span>',
-    months:["January","February","March","April","May","June",
-      "July","August","September","October","November","December"],
-    days:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],
-    locale:"en-IN",
-    bestSuffix:" &nbsp;<span style='color:green;font-weight:bold'>BEST ✅</span>",
+    bBest:'<span style="color:green;font-weight:bold">BEST \u2705</span>',
+    bGood:'<span style="color:orange;font-weight:bold">GOOD</span>',
+    bestSfx:" &nbsp;<span style='color:green;font-weight:bold'>BEST \u2705</span>",
+    tithiNames: TN_EN, months: MONTHS_EN, days: DAYS_EN, locale:"en-IN"
   },
-  hi: {
-    appTitle:"सार्वभौमिक मुहूर्त कैलकुलेटर",
-    placeholder:"शहर का नाम लिखें",
-    calcBtn:"गणना करें",
-    festBtn:"🪔 पर्व कैलेंडर",
-    detecting:"आपका स्थान पता लगाया जा रहा है...",
-    calculating:"गणना हो रही है...",
-    detected:"पता चला: ",
-    ipLocation:"IP स्थान: ",
-    defaultCity:"डिफ़ॉल्ट: चेन्नई",
-    sunrise:"सूर्योदय",sunset:"सूर्यास्त",
-    allTimes:"सभी समय",localTime:"के स्थानीय समय में",
-    bestTitle:"✨ शुभ मुहूर्त (सर्वोत्तम समय)",
-    noBest:"आज कोई शुभ मुहूर्त नहीं",
-    currentTitle:"वर्तमान मुहूर्त —",
-    undetected:"पता नहीं चला",
-    beforeSun:"सूर्योदय से पहले — कल रात",
-    dayChog:"दिन चौघड़िया",nightChog:"रात चौघड़िया",
-    tableTime:"समय",tableName:"नाम",tableQual:"गुण",
-    now:" ◀ अभी",
-    festTitle:"पर्व कैलेंडर",
-    noFestData:"इस वर्ष के लिए डेटा नहीं:",
-    festNote:"कृपया पद्मोदय कैलेंडर से अपडेट करें",
-    todayLabel:" ⭐ आज",
-    rahu:"राहु",yama:"यम",kv:"काल वेला",vv:"वार वेला",kr:"काल रात्रि",
-    navkarsi:"नवकारसी",porsi:"पोरसी",
-    tithi:"तिथि",shukla:"शुक्ल",krishna:"कृष्ण",
-    tithiApprox:"(अनुमानित)",
-    tithiNames:["प्रतिपदा","द्वितीया","तृतीया","चतुर्थी","पंचमी","षष्ठी",
-      "सप्तमी","अष्टमी","नवमी","दशमी","एकादशी","द्वादशी","त्रयोदशी",
-      "चतुर्दशी","पूर्णिमा","प्रतिपदा","द्वितीया","तृतीया","चतुर्थी","पंचमी",
-      "षष्ठी","सप्तमी","अष्टमी","नवमी","दशमी","एकादशी","द्वादशी",
-      "त्रयोदशी","चतुर्दशी","अमावस्या"],
-    qBest:"सर्वोत्तम",qGood:"उत्तम",qInauspicious:"अशुभ",
-    qRahu:"राहु",qYama:"यम",qKV:"काल वेला",qVV:"वार वेला",qKR:"काल रात्रि",
-    badgeBest:'<span style="color:green;font-weight:bold">सर्वोत्तम ✅</span>',
-    badgeGood:'<span style="color:orange;font-weight:bold">उत्तम</span>',
-    months:["जनवरी","फरवरी","मार्च","अप्रैल","मई","जून",
-      "जुलाई","अगस्त","सितंबर","अक्टूबर","नवंबर","दिसंबर"],
-    days:["रवि","सोम","मंगल","बुध","गुरु","शुक्र","शनि"],
-    locale:"hi-IN",
-    bestSuffix:" &nbsp;<span style='color:green;font-weight:bold'>सर्वोत्तम ✅</span>",
+  hi:{
+    appTitle:"\u0938\u093E\u0930\u094D\u0935\u092D\u094C\u092E\u093F\u0915 \u092E\u0941\u0939\u0942\u0930\u094D\u0924 \u0915\u0948\u0932\u0915\u0941\u0932\u0947\u091F\u0930",
+    placeholder:"\u0936\u0939\u0930 \u0915\u093E \u0928\u093E\u092E \u0932\u093F\u0916\u0947\u0902",
+    calcBtn:"\u0917\u0923\u0928\u093E \u0915\u0930\u0947\u0902",
+    festBtn:"\u1F54E \u092A\u0930\u094D\u0935 \u0915\u0948\u0932\u0947\u0902\u0921\u0930",
+    detecting:"\u0938\u094D\u0925\u093E\u0928 \u0922\u0942\u0902\u0922\u093E \u091C\u093E \u0930\u0939\u093E \u0939\u0948...",
+    calculating:"\u0917\u0923\u0928\u093E \u0939\u094B \u0930\u0939\u0940 \u0939\u0948...",
+    detected:"\u092E\u093F\u0932\u093E: ",
+    ipLoc:"IP \u0938\u094D\u0925\u093E\u0928: ",
+    defCity:"\u0921\u093F\u092B\u093C\u0949\u0932\u094D\u091F: \u091A\u0947\u0928\u094D\u0928\u0908",
+    sunrise:"\u0938\u0942\u0930\u094D\u092F\u094B\u0926\u092F",sunset:"\u0938\u0942\u0930\u094D\u092F\u093E\u0938\u094D\u0924",
+    allTimes:"\u0938\u092D\u0940 \u0938\u092E\u092F",localTime:"\u0915\u0947 \u0938\u094D\u0925\u093E\u0928\u0940\u092F \u0938\u092E\u092F \u092E\u0947\u0902",
+    bestTitle:"\u2728 \u0936\u0941\u092D \u092E\u0941\u0939\u0942\u0930\u094D\u0924",noBest:"\u0906\u091C \u0915\u094B\u0908 \u0936\u0941\u092D \u092E\u0941\u0939\u0942\u0930\u094D\u0924 \u0928\u0939\u0940\u0902",
+    curTitle:"\u0935\u0930\u094D\u0924\u092E\u093E\u0928 \u092E\u0941\u0939\u0942\u0930\u094D\u0924 -",undetected:"\u092A\u0924\u093E \u0928\u0939\u0940\u0902 \u091A\u0932\u093E",
+    beforeSun:"\u0938\u0942\u0930\u094D\u092F\u094B\u0926\u092F \u0938\u0947 \u092A\u0939\u0932\u0947",
+    dayChog:"\u0926\u093F\u0928 \u091A\u094C\u0918\u0921\u093C\u093F\u092F\u093E",nightChog:"\u0930\u093E\u0924 \u091A\u094C\u0918\u0921\u093C\u093F\u092F\u093E",
+    tTime:"\u0938\u092E\u092F",tName:"\u0928\u093E\u092E",tQual:"\u0917\u0941\u0923",now:" \u25C4 \u0905\u092D\u0940",
+    festTitle:"\u092A\u0930\u094D\u0935 \u0915\u0948\u0932\u0947\u0902\u0921\u0930",noFestData:"\u0921\u0947\u091F\u093E \u0928\u0939\u0940\u0902:",
+    festNote:"\u092A\u0926\u094D\u092E\u094B\u0926\u092F \u0938\u0947 \u0905\u092A\u0921\u0947\u091F \u0915\u0930\u0947\u0902",today:" \u2B50 \u0906\u091C",
+    rahu:"\u0930\u093E\u0939\u0941",yama:"\u092F\u092E",kv:"\u0915\u093E\u0932 \u0935\u0947\u0932\u093E",vv:"\u0935\u093E\u0930 \u0935\u0947\u0932\u093E",kr:"\u0915\u093E\u0932 \u0930\u093E\u0924\u094D\u0930\u093F",
+    navkarsi:"\u0928\u0935\u0915\u093E\u0930\u0938\u0940",porsi:"\u092A\u094B\u0930\u0938\u0940",
+    then:"\u092B\u093F\u0930",
+    qBest:"\u0938\u0930\u094D\u0935\u094B\u0924\u094D\u0924\u092E",qGood:"\u0909\u0924\u094D\u0924\u092E",qBad:"\u0905\u0936\u0941\u092D",
+    qRahu:"\u0930\u093E\u0939\u0941",qYama:"\u092F\u092E",qKV:"\u0915\u093E\u0932 \u0935\u0947\u0932\u093E",qVV:"\u0935\u093E\u0930 \u0935\u0947\u0932\u093E",qKR:"\u0915\u093E\u0932 \u0930\u093E\u0924\u094D\u0930\u093F",
+    bBest:'<span style="color:green;font-weight:bold">\u0938\u0930\u094D\u0935\u094B\u0924\u094D\u0924\u092E \u2705</span>',
+    bGood:'<span style="color:orange;font-weight:bold">\u0909\u0924\u094D\u0924\u092E</span>',
+    bestSfx:" &nbsp;<span style='color:green;font-weight:bold'>\u0938\u0930\u094D\u0935\u094B\u0924\u094D\u0924\u092E \u2705</span>",
+    tithiNames: TN_HI, months: MONTHS_HI, days: DAYS_HI, locale:"hi-IN"
   }
 };
 
-function setLang(lang){
-  LANG=lang; localStorage.setItem("muhurat_lang",lang);
+function t(){return TX[LANG]||TX.en;}
+
+function setLang(l){
+  LANG=l; lsSet('muhurat_lang',l);
+  document.getElementById('langScreen').style.display='none';
+  document.getElementById('app').style.display='block';
   applyLang();
-  document.getElementById("langScreen").style.display="none";
-  document.getElementById("app").style.display="block";
   initApp();
 }
 function changeLang(){
-  document.getElementById("langScreen").style.display="flex";
-  document.getElementById("app").style.display="none";
+  document.getElementById('langScreen').style.display='flex';
+  document.getElementById('app').style.display='none';
 }
 function applyLang(){
-  const t=T[LANG];
-  document.getElementById("appTitle").textContent=t.appTitle;
-  document.getElementById("city").placeholder=t.placeholder;
-  document.getElementById("calcBtn").textContent=t.calcBtn;
-  document.getElementById("festBtn").innerHTML=t.festBtn;
-  document.getElementById("status").textContent=t.detecting;
+  var tx=t();
+  document.getElementById('appTitle').textContent=tx.appTitle;
+  document.getElementById('city').placeholder=tx.placeholder;
+  document.getElementById('calcBtn').textContent=tx.calcBtn;
+  document.getElementById('festBtn').textContent='\u1F54E '+tx.festTitle;
+  document.getElementById('sts').textContent=tx.detecting;
 }
 
-// ══════════════════════════════════════════════════════════
-// UTILITIES
-// ══════════════════════════════════════════════════════════
-function capitalize(str){
-  if(!str)return str;
-  return str.split(" ").map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
-}
-function getPhoneDateStr(){
-  const n=new Date();
-  return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0");
-}
-function getCityDateStr(tzOffset){
-  const now=new Date(),cityMs=now.getTime()+tzOffset*3600000,cityDate=new Date(cityMs);
-  return cityDate.getUTCFullYear()+"-"+String(cityDate.getUTCMonth()+1).padStart(2,"0")+"-"+String(cityDate.getUTCDate()).padStart(2,"0");
-}
-function format(m){
-  m=((m%1440)+1440)%1440;
-  const h=Math.floor(m/60),mm=Math.round(m%60),ampm=h<12?"AM":"PM",h12=h%12===0?12:h%12;
-  return h12+":"+String(mm).padStart(2,"0")+" "+ampm;
-}
-function divide(s,e){const p=(e-s)/8,a=[];for(let i=0;i<8;i++)a.push([s+i*p,s+(i+1)*p]);return a;}
-function inP(t,s,e){return t>=s&&t<e;}
+// ── Utilities ─────────────────────────────────────────────
+function cap(s){if(!s)return s;return s.split(' ').map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(' ');}
+function dateStr(){var n=new Date();return n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate());}
+function pad(n){return String(n).padStart(2,'0');}
+function cityDateStr(tz){var now=new Date(),d=new Date(now.getTime()+tz*3600000);return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate());}
+function fmt(m){m=((m%1440)+1440)%1440;var h=Math.floor(m/60),mm=Math.round(m%60),ap=h<12?'AM':'PM',h12=h%12===0?12:h%12;return h12+':'+pad(mm)+' '+ap;}
+function div(s,e){var p=(e-s)/8,a=[];for(var i=0;i<8;i++)a.push([s+i*p,s+(i+1)*p]);return a;}
+function inP(v,s,e){return v>=s&&v<e;}
 
-// ══════════════════════════════════════════════════════════
-// CITY DATABASE
-// ══════════════════════════════════════════════════════════
-const CITIES={
-  "mumbai":{lat:19.076,lon:72.877,tz:"Asia/Kolkata"},
-  "delhi":{lat:28.613,lon:77.209,tz:"Asia/Kolkata"},
-  "new delhi":{lat:28.613,lon:77.209,tz:"Asia/Kolkata"},
-  "chennai":{lat:13.082,lon:80.270,tz:"Asia/Kolkata"},
-  "bangalore":{lat:12.971,lon:77.594,tz:"Asia/Kolkata"},
-  "bengaluru":{lat:12.971,lon:77.594,tz:"Asia/Kolkata"},
-  "hyderabad":{lat:17.385,lon:78.486,tz:"Asia/Kolkata"},
-  "kolkata":{lat:22.572,lon:88.363,tz:"Asia/Kolkata"},
-  "calcutta":{lat:22.572,lon:88.363,tz:"Asia/Kolkata"},
-  "pune":{lat:18.520,lon:73.856,tz:"Asia/Kolkata"},
-  "ahmedabad":{lat:23.022,lon:72.571,tz:"Asia/Kolkata"},
-  "jaipur":{lat:26.912,lon:75.787,tz:"Asia/Kolkata"},
-  "surat":{lat:21.170,lon:72.831,tz:"Asia/Kolkata"},
-  "lucknow":{lat:26.846,lon:80.946,tz:"Asia/Kolkata"},
-  "nagpur":{lat:21.145,lon:79.088,tz:"Asia/Kolkata"},
-  "indore":{lat:22.719,lon:75.857,tz:"Asia/Kolkata"},
-  "bhopal":{lat:23.259,lon:77.412,tz:"Asia/Kolkata"},
-  "patna":{lat:25.594,lon:85.137,tz:"Asia/Kolkata"},
-  "vadodara":{lat:22.307,lon:73.181,tz:"Asia/Kolkata"},
-  "agra":{lat:27.176,lon:78.008,tz:"Asia/Kolkata"},
-  "varanasi":{lat:25.317,lon:82.973,tz:"Asia/Kolkata"},
-  "banaras":{lat:25.317,lon:82.973,tz:"Asia/Kolkata"},
-  "amritsar":{lat:31.634,lon:74.872,tz:"Asia/Kolkata"},
-  "chandigarh":{lat:30.733,lon:76.779,tz:"Asia/Kolkata"},
-  "coimbatore":{lat:11.016,lon:76.955,tz:"Asia/Kolkata"},
-  "kochi":{lat:9.931,lon:76.267,tz:"Asia/Kolkata"},
-  "cochin":{lat:9.931,lon:76.267,tz:"Asia/Kolkata"},
-  "mysore":{lat:12.295,lon:76.639,tz:"Asia/Kolkata"},
-  "mysuru":{lat:12.295,lon:76.639,tz:"Asia/Kolkata"},
-  "thiruvananthapuram":{lat:8.524,lon:76.936,tz:"Asia/Kolkata"},
-  "trivandrum":{lat:8.524,lon:76.936,tz:"Asia/Kolkata"},
-  "nashik":{lat:19.997,lon:73.789,tz:"Asia/Kolkata"},
-  "jodhpur":{lat:26.238,lon:73.024,tz:"Asia/Kolkata"},
-  "udaipur":{lat:24.585,lon:73.712,tz:"Asia/Kolkata"},
-  "goa":{lat:15.299,lon:74.124,tz:"Asia/Kolkata"},
-  "srinagar":{lat:34.083,lon:74.797,tz:"Asia/Kolkata"},
-  "shimla":{lat:31.104,lon:77.173,tz:"Asia/Kolkata"},
-  "dehradun":{lat:30.316,lon:78.032,tz:"Asia/Kolkata"},
-  "haridwar":{lat:29.945,lon:78.164,tz:"Asia/Kolkata"},
-  "ujjain":{lat:23.176,lon:75.788,tz:"Asia/Kolkata"},
-  "mathura":{lat:27.492,lon:77.673,tz:"Asia/Kolkata"},
-  "tirupati":{lat:13.628,lon:79.419,tz:"Asia/Kolkata"},
-  "shirdi":{lat:19.765,lon:74.476,tz:"Asia/Kolkata"},
-  "kathmandu":{lat:27.717,lon:85.324,tz:"Asia/Kathmandu"},
-  "colombo":{lat:6.927,lon:79.861,tz:"Asia/Colombo"},
-  "dhaka":{lat:23.810,lon:90.412,tz:"Asia/Dhaka"},
-  "karachi":{lat:24.860,lon:67.001,tz:"Asia/Karachi"},
-  "lahore":{lat:31.520,lon:74.358,tz:"Asia/Karachi"},
-  "islamabad":{lat:33.684,lon:73.047,tz:"Asia/Karachi"},
-  "london":{lat:51.507,lon:-0.127,tz:"Europe/London"},
-  "paris":{lat:48.856,lon:2.352,tz:"Europe/Paris"},
-  "berlin":{lat:52.520,lon:13.405,tz:"Europe/Berlin"},
-  "rome":{lat:41.902,lon:12.496,tz:"Europe/Rome"},
-  "madrid":{lat:40.416,lon:-3.703,tz:"Europe/Madrid"},
-  "amsterdam":{lat:52.367,lon:4.904,tz:"Europe/Amsterdam"},
-  "dubai":{lat:25.204,lon:55.270,tz:"Asia/Dubai"},
-  "abu dhabi":{lat:24.453,lon:54.377,tz:"Asia/Dubai"},
-  "riyadh":{lat:24.713,lon:46.675,tz:"Asia/Riyadh"},
-  "doha":{lat:25.285,lon:51.531,tz:"Asia/Qatar"},
-  "muscat":{lat:23.588,lon:58.382,tz:"Asia/Muscat"},
-  "singapore":{lat:1.352,lon:103.819,tz:"Asia/Singapore"},
-  "kuala lumpur":{lat:3.139,lon:101.686,tz:"Asia/Kuala_Lumpur"},
-  "bangkok":{lat:13.756,lon:100.501,tz:"Asia/Bangkok"},
-  "jakarta":{lat:-6.208,lon:106.845,tz:"Asia/Jakarta"},
-  "tokyo":{lat:35.676,lon:139.650,tz:"Asia/Tokyo"},
-  "osaka":{lat:34.693,lon:135.502,tz:"Asia/Tokyo"},
-  "seoul":{lat:37.566,lon:126.978,tz:"Asia/Seoul"},
-  "beijing":{lat:39.904,lon:116.407,tz:"Asia/Shanghai"},
-  "shanghai":{lat:31.230,lon:121.473,tz:"Asia/Shanghai"},
-  "hong kong":{lat:22.319,lon:114.169,tz:"Asia/Hong_Kong"},
-  "taipei":{lat:25.033,lon:121.565,tz:"Asia/Taipei"},
-  "sydney":{lat:-33.868,lon:151.209,tz:"Australia/Sydney"},
-  "melbourne":{lat:-37.813,lon:144.963,tz:"Australia/Sydney"},
-  "auckland":{lat:-36.848,lon:174.763,tz:"Pacific/Auckland"},
-  "new york":{lat:40.712,lon:-74.005,tz:"America/New_York"},
-  "los angeles":{lat:34.052,lon:-118.243,tz:"America/Los_Angeles"},
-  "chicago":{lat:41.878,lon:-87.629,tz:"America/Chicago"},
-  "houston":{lat:29.760,lon:-95.369,tz:"America/Chicago"},
-  "dallas":{lat:32.776,lon:-96.796,tz:"America/Chicago"},
-  "san francisco":{lat:37.774,lon:-122.419,tz:"America/Los_Angeles"},
-  "seattle":{lat:47.606,lon:-122.332,tz:"America/Los_Angeles"},
-  "boston":{lat:42.360,lon:-71.058,tz:"America/New_York"},
-  "miami":{lat:25.761,lon:-80.191,tz:"America/New_York"},
-  "washington":{lat:38.907,lon:-77.036,tz:"America/New_York"},
-  "washington dc":{lat:38.907,lon:-77.036,tz:"America/New_York"},
-  "ashburn":{lat:39.043,lon:-77.487,tz:"America/New_York"},
-  "atlanta":{lat:33.748,lon:-84.387,tz:"America/New_York"},
-  "toronto":{lat:43.653,lon:-79.383,tz:"America/Toronto"},
-  "vancouver":{lat:49.282,lon:-123.120,tz:"America/Vancouver"},
-  "mexico city":{lat:19.432,lon:-99.133,tz:"America/Mexico_City"},
-  "cairo":{lat:30.044,lon:31.235,tz:"Africa/Cairo"},
-  "nairobi":{lat:-1.292,lon:36.821,tz:"Africa/Nairobi"},
-  "johannesburg":{lat:-26.204,lon:28.047,tz:"Africa/Johannesburg"},
-  "cape town":{lat:-33.924,lon:18.424,tz:"Africa/Johannesburg"},
-  "lagos":{lat:6.524,lon:3.379,tz:"Africa/Lagos"},
-  "tehran":{lat:35.689,lon:51.389,tz:"Asia/Tehran"},
-  "moscow":{lat:55.755,lon:37.617,tz:"Europe/Moscow"},
-  "istanbul":{lat:41.008,lon:28.978,tz:"Europe/Istanbul"},
-};
+// ── Cities ────────────────────────────────────────────────
+var CI={"mumbai":{lat:19.076,lon:72.877,tz:"Asia/Kolkata"},"delhi":{lat:28.613,lon:77.209,tz:"Asia/Kolkata"},"new delhi":{lat:28.613,lon:77.209,tz:"Asia/Kolkata"},"chennai":{lat:13.082,lon:80.270,tz:"Asia/Kolkata"},"bangalore":{lat:12.971,lon:77.594,tz:"Asia/Kolkata"},"bengaluru":{lat:12.971,lon:77.594,tz:"Asia/Kolkata"},"hyderabad":{lat:17.385,lon:78.486,tz:"Asia/Kolkata"},"kolkata":{lat:22.572,lon:88.363,tz:"Asia/Kolkata"},"calcutta":{lat:22.572,lon:88.363,tz:"Asia/Kolkata"},"pune":{lat:18.520,lon:73.856,tz:"Asia/Kolkata"},"ahmedabad":{lat:23.022,lon:72.571,tz:"Asia/Kolkata"},"jaipur":{lat:26.912,lon:75.787,tz:"Asia/Kolkata"},"surat":{lat:21.170,lon:72.831,tz:"Asia/Kolkata"},"lucknow":{lat:26.846,lon:80.946,tz:"Asia/Kolkata"},"nagpur":{lat:21.145,lon:79.088,tz:"Asia/Kolkata"},"indore":{lat:22.719,lon:75.857,tz:"Asia/Kolkata"},"bhopal":{lat:23.259,lon:77.412,tz:"Asia/Kolkata"},"patna":{lat:25.594,lon:85.137,tz:"Asia/Kolkata"},"vadodara":{lat:22.307,lon:73.181,tz:"Asia/Kolkata"},"agra":{lat:27.176,lon:78.008,tz:"Asia/Kolkata"},"varanasi":{lat:25.317,lon:82.973,tz:"Asia/Kolkata"},"banaras":{lat:25.317,lon:82.973,tz:"Asia/Kolkata"},"amritsar":{lat:31.634,lon:74.872,tz:"Asia/Kolkata"},"chandigarh":{lat:30.733,lon:76.779,tz:"Asia/Kolkata"},"coimbatore":{lat:11.016,lon:76.955,tz:"Asia/Kolkata"},"kochi":{lat:9.931,lon:76.267,tz:"Asia/Kolkata"},"cochin":{lat:9.931,lon:76.267,tz:"Asia/Kolkata"},"mysore":{lat:12.295,lon:76.639,tz:"Asia/Kolkata"},"mysuru":{lat:12.295,lon:76.639,tz:"Asia/Kolkata"},"thiruvananthapuram":{lat:8.524,lon:76.936,tz:"Asia/Kolkata"},"trivandrum":{lat:8.524,lon:76.936,tz:"Asia/Kolkata"},"nashik":{lat:19.997,lon:73.789,tz:"Asia/Kolkata"},"jodhpur":{lat:26.238,lon:73.024,tz:"Asia/Kolkata"},"udaipur":{lat:24.585,lon:73.712,tz:"Asia/Kolkata"},"goa":{lat:15.299,lon:74.124,tz:"Asia/Kolkata"},"srinagar":{lat:34.083,lon:74.797,tz:"Asia/Kolkata"},"shimla":{lat:31.104,lon:77.173,tz:"Asia/Kolkata"},"dehradun":{lat:30.316,lon:78.032,tz:"Asia/Kolkata"},"haridwar":{lat:29.945,lon:78.164,tz:"Asia/Kolkata"},"ujjain":{lat:23.176,lon:75.788,tz:"Asia/Kolkata"},"mathura":{lat:27.492,lon:77.673,tz:"Asia/Kolkata"},"tirupati":{lat:13.628,lon:79.419,tz:"Asia/Kolkata"},"shirdi":{lat:19.765,lon:74.476,tz:"Asia/Kolkata"},"kathmandu":{lat:27.717,lon:85.324,tz:"Asia/Kathmandu"},"colombo":{lat:6.927,lon:79.861,tz:"Asia/Colombo"},"dhaka":{lat:23.810,lon:90.412,tz:"Asia/Dhaka"},"karachi":{lat:24.860,lon:67.001,tz:"Asia/Karachi"},"lahore":{lat:31.520,lon:74.358,tz:"Asia/Karachi"},"islamabad":{lat:33.684,lon:73.047,tz:"Asia/Karachi"},"london":{lat:51.507,lon:-0.127,tz:"Europe/London"},"paris":{lat:48.856,lon:2.352,tz:"Europe/Paris"},"berlin":{lat:52.520,lon:13.405,tz:"Europe/Berlin"},"rome":{lat:41.902,lon:12.496,tz:"Europe/Rome"},"madrid":{lat:40.416,lon:-3.703,tz:"Europe/Madrid"},"amsterdam":{lat:52.367,lon:4.904,tz:"Europe/Amsterdam"},"dubai":{lat:25.204,lon:55.270,tz:"Asia/Dubai"},"abu dhabi":{lat:24.453,lon:54.377,tz:"Asia/Dubai"},"riyadh":{lat:24.713,lon:46.675,tz:"Asia/Riyadh"},"doha":{lat:25.285,lon:51.531,tz:"Asia/Qatar"},"muscat":{lat:23.588,lon:58.382,tz:"Asia/Muscat"},"singapore":{lat:1.352,lon:103.819,tz:"Asia/Singapore"},"kuala lumpur":{lat:3.139,lon:101.686,tz:"Asia/Kuala_Lumpur"},"bangkok":{lat:13.756,lon:100.501,tz:"Asia/Bangkok"},"jakarta":{lat:-6.208,lon:106.845,tz:"Asia/Jakarta"},"tokyo":{lat:35.676,lon:139.650,tz:"Asia/Tokyo"},"osaka":{lat:34.693,lon:135.502,tz:"Asia/Tokyo"},"seoul":{lat:37.566,lon:126.978,tz:"Asia/Seoul"},"beijing":{lat:39.904,lon:116.407,tz:"Asia/Shanghai"},"shanghai":{lat:31.230,lon:121.473,tz:"Asia/Shanghai"},"hong kong":{lat:22.319,lon:114.169,tz:"Asia/Hong_Kong"},"taipei":{lat:25.033,lon:121.565,tz:"Asia/Taipei"},"sydney":{lat:-33.868,lon:151.209,tz:"Australia/Sydney"},"melbourne":{lat:-37.813,lon:144.963,tz:"Australia/Sydney"},"auckland":{lat:-36.848,lon:174.763,tz:"Pacific/Auckland"},"new york":{lat:40.712,lon:-74.005,tz:"America/New_York"},"los angeles":{lat:34.052,lon:-118.243,tz:"America/Los_Angeles"},"chicago":{lat:41.878,lon:-87.629,tz:"America/Chicago"},"houston":{lat:29.760,lon:-95.369,tz:"America/Chicago"},"dallas":{lat:32.776,lon:-96.796,tz:"America/Chicago"},"san francisco":{lat:37.774,lon:-122.419,tz:"America/Los_Angeles"},"seattle":{lat:47.606,lon:-122.332,tz:"America/Los_Angeles"},"boston":{lat:42.360,lon:-71.058,tz:"America/New_York"},"miami":{lat:25.761,lon:-80.191,tz:"America/New_York"},"washington":{lat:38.907,lon:-77.036,tz:"America/New_York"},"washington dc":{lat:38.907,lon:-77.036,tz:"America/New_York"},"toronto":{lat:43.653,lon:-79.383,tz:"America/Toronto"},"vancouver":{lat:49.282,lon:-123.120,tz:"America/Vancouver"},"mexico city":{lat:19.432,lon:-99.133,tz:"America/Mexico_City"},"cairo":{lat:30.044,lon:31.235,tz:"Africa/Cairo"},"nairobi":{lat:-1.292,lon:36.821,tz:"Africa/Nairobi"},"johannesburg":{lat:-26.204,lon:28.047,tz:"Africa/Johannesburg"},"cape town":{lat:-33.924,lon:18.424,tz:"Africa/Johannesburg"},"lagos":{lat:6.524,lon:3.379,tz:"Africa/Lagos"},"tehran":{lat:35.689,lon:51.389,tz:"Asia/Tehran"},"moscow":{lat:55.755,lon:37.617,tz:"Europe/Moscow"},"istanbul":{lat:41.008,lon:28.978,tz:"Europe/Istanbul"}};
+var HC = {"mumbai":"मुंबई","delhi":"दिल्ली","new delhi":"नई दिल्ली","chennai":"चेन्नई","bangalore":"बेंगलुरु","bengaluru":"बेंगलुरु","hyderabad":"हैदराबाद","kolkata":"कोलकाता","calcutta":"कोलकाता","pune":"पुणे","ahmedabad":"अहमदाबाद","jaipur":"जयपुर","surat":"सूरत","lucknow":"लखनऔ","nagpur":"नागपुर","indore":"इंदौर","bhopal":"भोपाल","patna":"पटना","vadodara":"वडोदरा","agra":"आगरा","varanasi":"वाराणसी","banaras":"बनारस","amritsar":"अमृतसर","chandigarh":"चंडीगढ़","coimbatore":"कोयम्बटूर","kochi":"कोच्चि","cochin":"कोच्चि","mysore":"मैसूर","mysuru":"मैसूरु","nashik":"नासिक","jodhpur":"जोधपुर","udaipur":"उदयपुर","goa":"गोवा","srinagar":"श्रीनगर","shimla":"शिमला","dehradun":"देहरादून","haridwar":"हरिद्वार","ujjain":"उज्जैन","mathura":"मथुरा","tirupati":"तिरुपति","shirdi":"शिरड़ी","kathmandu":"काठमांडू","colombo":"कोलंबो","dhaka":"ढाका","karachi":"कराची","lahore":"लाहौर","islamabad":"इस्लामाबाद","london":"लंदन","paris":"पेरिस","berlin":"बर्लिन","rome":"रोम","madrid":"मैड्रिड","dubai":"दुबई","abu dhabi":"अबू धाबी","riyadh":"रियाद","doha":"दोहा","muscat":"मस्कट","singapore":"सिंगापुर","bangkok":"बैंकॉक","tokyo":"टोक्यो","seoul":"सियोल","beijing":"बीजिंग","shanghai":"शंघाई","hong kong":"हांगकांग","sydney":"सिडनी","melbourne":"मेलबर्न","auckland":"ओकलैंड","new york":"न्यूयॉर्क","los angeles":"लॉस एंजिल्स","chicago":"शिकागो","houston":"ह्यूस्टन","dallas":"डलास","san francisco":"सैन फ्रांसिस्को","seattle":"सिएटल","boston":"बोस्टन","miami":"मियामी","washington":"वाशिंगटन","washington dc":"वाशिंगटन डीसी","toronto":"टोरंटो","vancouver":"वैंकूवर","mexico city":"मेक्सिको सिटी","cairo":"काहिरा","nairobi":"नैरोबी","johannesburg":"जोहान्सबर्ग","cape town":"केप टाउन","lagos":"लागोस","tehran":"तेहरान","moscow":"मॉस्को","istanbul":"इस्तांबुल"};
 
-const HINDI_CITIES={
-  "mumbai":"मुंबई","delhi":"दिल्ली","new delhi":"नई दिल्ली",
-  "chennai":"चेन्नई","bangalore":"बेंगलुरु","bengaluru":"बेंगलुरु",
-  "hyderabad":"हैदराबाद","kolkata":"कोलकाता","calcutta":"कोलकाता",
-  "pune":"पुणे","ahmedabad":"अहमदाबाद","jaipur":"जयपुर",
-  "surat":"सूरत","lucknow":"लखनऊ","nagpur":"नागपुर",
-  "indore":"इंदौर","bhopal":"भोपाल","patna":"पटना",
-  "vadodara":"वडोदरा","agra":"आगरा","varanasi":"वाराणसी",
-  "banaras":"बनारस","amritsar":"अमृतसर","chandigarh":"चंडीगढ़",
-  "coimbatore":"कोयम्बटूर","kochi":"कोच्चि","cochin":"कोच्चि",
-  "mysore":"मैसूर","mysuru":"मैसूरु","thiruvananthapuram":"तिरुवनंतपुरम",
-  "trivandrum":"तिरुवनंतपुरम","nashik":"नासिक","jodhpur":"जोधपुर",
-  "udaipur":"उदयपुर","goa":"गोवा","srinagar":"श्रीनगर",
-  "shimla":"शिमला","dehradun":"देहरादून","haridwar":"हरिद्वार",
-  "ujjain":"उज्जैन","mathura":"मथुरा","tirupati":"तिरुपति",
-  "shirdi":"शिरडी","kathmandu":"काठमांडू","colombo":"कोलंबो",
-  "dhaka":"ढाका","karachi":"कराची","lahore":"लाहौर",
-  "islamabad":"इस्लामाबाद","london":"लंदन","paris":"पेरिस",
-  "berlin":"बर्लिन","rome":"रोम","madrid":"मैड्रिड",
-  "dubai":"दुबई","abu dhabi":"अबू धाबी","riyadh":"रियाद",
-  "doha":"दोहा","muscat":"मस्कट","singapore":"सिंगापुर",
-  "bangkok":"बैंकॉक","tokyo":"टोक्यो","seoul":"सियोल",
-  "beijing":"बीजिंग","shanghai":"शंघाई","hong kong":"हांगकांग",
-  "sydney":"सिडनी","melbourne":"मेलबर्न","auckland":"ऑकलैंड",
-  "new york":"न्यूयॉर्क","los angeles":"लॉस एंजिल्स",
-  "chicago":"शिकागो","houston":"ह्यूस्टन","dallas":"डलास",
-  "san francisco":"सैन फ्रांसिस्को","seattle":"सिएटल",
-  "boston":"बोस्टन","miami":"मियामी","washington":"वाशिंगटन",
-  "washington dc":"वाशिंगटन डीसी","ashburn":"एशबर्न",
-  "atlanta":"अटलांटा","toronto":"टोरंटो","vancouver":"वैंकूवर",
-  "mexico city":"मेक्सिको सिटी","cairo":"काहिरा",
-  "nairobi":"नैरोबी","johannesburg":"जोहान्सबर्ग",
-  "cape town":"केप टाउन","lagos":"लागोस",
-  "tehran":"तेहरान","moscow":"मॉस्को","istanbul":"इस्तांबुल",
-};
-
-function getDisplayName(n){if(LANG==="hi"){const k=n.trim().toLowerCase();return HINDI_CITIES[k]||n;}return n;}
-function findCity(name){const k=name.trim().toLowerCase();if(CITIES[k])return CITIES[k];for(const key in CITIES){if(key.includes(k)||k.includes(key))return CITIES[key];}return null;}
-function getOffset(tzName,dateStr){try{const d=new Date(dateStr+"T12:00:00Z"),a=new Date(d.toLocaleString("en-US",{timeZone:tzName})),b=new Date(d.toLocaleString("en-US",{timeZone:"UTC"}));return(a-b)/3600000;}catch(e){return 5.5;}}
-function guessTz(lat,lon){if(lon>=68&&lon<=98&&lat>=6&&lat<=38)return"Asia/Kolkata";if(lon>=80&&lon<=89&&lat>=26&&lat<=31)return"Asia/Kathmandu";if(lon>=-10&&lon<=2&&lat>=49&&lat<=61)return"Europe/London";if(lon>=44&&lon<=60&&lat>=20&&lat<=40)return"Asia/Dubai";if(lon>=-80&&lon<=-65&&lat>=25&&lat<=50)return"America/New_York";if(lon>=-100&&lon<=-80&&lat>=25&&lat<=50)return"America/Chicago";if(lon>=-120&&lon<=-100&&lat>=25&&lat<=50)return"America/Los_Angeles";if(lon>=100&&lon<=145&&lat>=30&&lat<=50)return"Asia/Tokyo";return"UTC";}
-async function getSun(lat,lon,date,tz){const r=await fetch("https://api.sunrise-sunset.org/json?lat="+lat+"&lng="+lon+"&date="+date+"&formatted=0");const d=await r.json();if(!d||d.status!=="OK")throw new Error(LANG==="hi"?"सूर्योदय-सूर्यास्त नहीं मिला। इंटरनेट जांचें।":"Cannot get sun times. Check internet.");function toLocal(u){const utcMins=new Date(u).getUTCHours()*60+new Date(u).getUTCMinutes();return((utcMins+tz*60)%1440+1440)%1440;}return{sunrise:toLocal(d.results.sunrise),sunset:toLocal(d.results.sunset)};}
-
-// ══════════════════════════════════════════════════════════
-// CHOGHADIYA
-// ══════════════════════════════════════════════════════════
-const DAY_SEQS_EN={0:["Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg"],1:["Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit"],2:["Rog","Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog"],3:["Labh","Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh"],4:["Shubh","Rog","Udveg","Char","Labh","Amrit","Kaal","Shubh"],5:["Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg","Char"],6:["Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit","Kaal"]};
-const DAY_SEQS_HI={0:["उद्वेग","चर","लाभ","अमृत","काल","शुभ","रोग","उद्वेग"],1:["अमृत","काल","शुभ","रोग","उद्वेग","चर","लाभ","अमृत"],2:["रोग","उद्वेग","चर","लाभ","अमृत","काल","शुभ","रोग"],3:["लाभ","अमृत","काल","शुभ","रोग","उद्वेग","चर","लाभ"],4:["शुभ","रोग","उद्वेग","चर","लाभ","अमृत","काल","शुभ"],5:["चर","लाभ","अमृत","काल","शुभ","रोग","उद्वेग","चर"],6:["काल","शुभ","रोग","उद्वेग","चर","लाभ","अमृत","काल"]};
-const CYCLE_EN=["Amrit","Char","Rog","Kaal","Labh","Udveg","Shubh"];
-const CYCLE_HI=["अमृत","चर","रोग","काल","लाभ","उद्वेग","शुभ"];
-const GOOD_EN=["Amrit","Shubh","Labh"],GOOD_HI=["अमृत","शुभ","लाभ"];
-const CHAR_EN="Char",CHAR_HI="चर";
-function getDaySeqs(wd){return LANG==="hi"?DAY_SEQS_HI[wd]:DAY_SEQS_EN[wd];}
-function getCycle(){return LANG==="hi"?CYCLE_HI:CYCLE_EN;}
-function getGood(){return LANG==="hi"?GOOD_HI:GOOD_EN;}
-function getChar(){return LANG==="hi"?CHAR_HI:CHAR_EN;}
-function getNightSeq(d){const cycle=getCycle(),idx=(cycle.indexOf(d[7])+1)%7,n=[];for(let i=0;i<8;i++)n.push(cycle[(idx+i)%7]);return n;}
-const rahuIdx=[7,1,6,4,5,3,2];
-const yamaIdx=[4,3,2,1,0,6,5];
-const kvIdx={0:4,1:1,2:5,3:2,4:6,5:3,6:0};
-const vvIdx={0:3,1:6,2:1,3:4,4:7,5:2,6:5};
-const krIdx={0:5,1:3,2:1,3:6,4:4,5:2,6:0};
-function getPd(sr,ss,i){const p=(ss-sr)/8;return[sr+p*i,sr+p*(i+1)];}
-function quality(n,s,rahu,yama,kv,vv,kr){const t=T[LANG];if(inP(s,rahu[0],rahu[1]))return t.qRahu;if(inP(s,yama[0],yama[1]))return t.qYama;if(inP(s,kv[0],kv[1]))return t.qKV;if(inP(s,vv[0],vv[1]))return t.qVV;if(inP(s,kr[0],kr[1]))return t.qKR;if(getGood().includes(n))return t.qBest;if(n===getChar())return t.qGood;return t.qInauspicious;}
-function badge(q){const t=T[LANG];if(q===t.qBest)return t.badgeBest;if(q===t.qGood)return t.badgeGood;return'<span style="color:red;font-weight:bold">'+q+'</span>';}
-
-// ══════════════════════════════════════════════════════════
-// FESTIVALS
-// ══════════════════════════════════════════════════════════
-const MY_FESTIVALS={
-  2026:[
-    ["2026-01-14","Makara Sankranti","मकर संक्रांति"],
-    ["2026-03-04","Holi","होली"],
-    ["2026-03-20","Ugadi / Navratri","उगादि / नवरात्रि"],
-    ["2026-03-27","Rama Navami","राम नवमी"],
-    ["2026-03-31","Mahavir Jayanti","महावीर जयंती"],
-    ["2026-04-14","Tamil New Year","तमिल नव वर्ष"],
-    ["2026-04-20","Akshay Tritiya","अक्षय तृतीया"],
-    ["2026-08-15","Independence Day","स्वतंत्रता दिवस"],
-    ["2026-08-28","Raksha Bandhan","रक्षा बंधन"],
-    ["2026-09-08","Paryushan Prarambh","पर्युषण पारंभ"],
-    ["2026-09-14","Ganesh Chaturthi","गणेश चतुर्थी"],
-    ["2026-09-15","Samvatsari","संवत्सरी"],
-    ["2026-10-11","Navratri","नवरात्रि"],
-    ["2026-10-20","Dussehra","दशहरा / विजयदशमी"],
-    ["2026-11-06","Dhanteras","धनतेरस"],
-    ["2026-11-08","Diwali","दीपावली"],
-    ["2026-12-25","Christmas","क्रिसमस"],
-  ]
-};
-function getFestName(f){return LANG==="hi"?f[2]:f[1];}
-
-// ══════════════════════════════════════════════════════════
-//  JAIN / HINDU PURNIMANTA LUNAR CALENDAR  ← FULLY CORRECTED
-//
-//  Three bugs fixed vs previous version:
-//  1. Month names: now uses Sun's rashi INGRESS during NM window
-//     (Rashi 0 Aries enters → Chaitra; Rashi 1 Taurus → Vaishakha; etc.)
-//     NOT the rashi the Sun is already sitting in at the NM.
-//  2. Purnimanta Krishna paksha → belongs to the NEXT Amanta month.
-//  3. Adhik Maas naming → uses PREVIOUS window's name (Adhik Jyeshtha
-//     precedes Ashadha, so it takes Jyeshtha's name, not Ashadha's).
-//  4. Ingress search extends 1 day past NM boundary to catch late ingresses.
-// ══════════════════════════════════════════════════════════
-
-const _LR = Math.PI / 180;
-
-// Gregorian date → Julian Day Number (at midnight UTC = JD − 0.5)
-function _jd(y, m, d) {
-  if (m <= 2) { y--; m += 12; }
-  const A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
-  return Math.floor(365.25*(y+4716)) + Math.floor(30.6001*(m+1)) + d + B - 1524.5;
+function getDN(n){if(LANG==='hi'){var k=n.trim().toLowerCase();return HC[k]||n;}return n;}
+function findCity(name){var k=name.trim().toLowerCase();if(CI[k])return CI[k];for(var key in CI){if(key.includes(k)||k.includes(key))return CI[key];}return null;}
+function getTZOff(tzName,ds){try{var d=new Date(ds+'T12:00:00Z'),a=new Date(d.toLocaleString('en-US',{timeZone:tzName})),b=new Date(d.toLocaleString('en-US',{timeZone:'UTC'}));return(a-b)/3600000;}catch(e){return 5.5;}}
+function guessTz(lat,lon){if(lon>=68&&lon<=98&&lat>=6&&lat<=38)return'Asia/Kolkata';if(lon>=80&&lon<=89&&lat>=26&&lat<=31)return'Asia/Kathmandu';if(lon>=-10&&lon<=2&&lat>=49&&lat<=61)return'Europe/London';if(lon>=44&&lon<=60&&lat>=20&&lat<=40)return'Asia/Dubai';if(lon>=-80&&lon<=-65&&lat>=25&&lat<=50)return'America/New_York';if(lon>=-100&&lon<=-80&&lat>=25&&lat<=50)return'America/Chicago';if(lon>=-120&&lon<=-100&&lat>=25&&lat<=50)return'America/Los_Angeles';if(lon>=100&&lon<=145&&lat>=30&&lat<=50)return'Asia/Tokyo';return'UTC';}
+function getSun(lat,lon,ds,tz){
+  return fetch('https://api.sunrise-sunset.org/json?lat='+lat+'&lng='+lon+'&date='+ds+'&formatted=0')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d||d.status!=='OK')throw new Error('Cannot get sun times');
+      function tl(u){var m=new Date(u).getUTCHours()*60+new Date(u).getUTCMinutes();return((m+tz*60)%1440+1440)%1440;}
+      return{sr:tl(d.results.sunrise),ss:tl(d.results.sunset)};
+    });
 }
 
-// Sidereal Sun longitude (degrees) using Lahiri ayanamsa
-function _sunLon(jd) {
-  const n = jd - 2451545.0;
-  const L = ((280.46646 + 0.9856474*n) % 360 + 360) % 360;
-  const g = ((357.52911 + 0.9856003*n) % 360 + 360) % 360;
-  const C = (1.914602 - 0.004817*(n/36525))*Math.sin(g*_LR)
-          + (0.019993 - 0.000101*(n/36525))*Math.sin(2*g*_LR);
-  const ayan = 23.85 + 0.013958*(n/36525);
-  return (((L + C) - ayan) % 360 + 360) % 360;
+// ── Choghadiya ────────────────────────────────────────────
+var DS_EN={0:["Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg"],1:["Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit"],2:["Rog","Udveg","Char","Labh","Amrit","Kaal","Shubh","Rog"],3:["Labh","Amrit","Kaal","Shubh","Rog","Udveg","Char","Labh"],4:["Shubh","Rog","Udveg","Char","Labh","Amrit","Kaal","Shubh"],5:["Char","Labh","Amrit","Kaal","Shubh","Rog","Udveg","Char"],6:["Kaal","Shubh","Rog","Udveg","Char","Labh","Amrit","Kaal"]};
+var DS_HI={0:["उद्वेग","चर","लाभ","अमृत","काल","शुभ","रोग","उद्वेग"],1:["अमृत","काल","शुभ","रोग","उद्वेग","चर","लाभ","अमृत"],2:["रोग","उद्वेग","चर","लाभ","अमृत","काल","शुभ","रोग"],3:["लाभ","अमृत","काल","शुभ","रोग","उद्वेग","चर","लाभ"],4:["शुभ","रोग","उद्वेग","चर","लाभ","अमृत","काल","शुभ"],5:["चर","लाभ","अमृत","काल","शुभ","रोग","उद्वेग","चर"],6:["काल","शुभ","रोग","उद्वेग","चर","लाभ","अमृत","काल"]};
+var CY_EN=["Amrit","Char","Rog","Kaal","Labh","Udveg","Shubh"];
+var CY_EN=["Amrit","Char","Rog","Kaal","Labh","Udveg","Shubh"];
+var CY_HI=["अमृत","चर","रोग","काल","लाभ","उद्वेग","शुभ"];
+var GD_EN=["Amrit","Shubh","Labh"];
+var GD_HI=["अमृत","शुभ","लाभ"];
+
+function getDSeq(wd){return LANG==='hi'?DS_HI[wd]:DS_EN[wd];}
+function getCycle(){return LANG==='hi'?CY_HI:CY_EN;}
+function getGood(){return LANG==='hi'?GD_HI:GD_EN;}
+function getChar(){return LANG==='hi'?CY_HI[1]:CY_EN[1];}
+function getNightSeq(d){var c=getCycle(),idx=(c.indexOf(d[7])+1)%7,n=[];for(var i=0;i<8;i++)n.push(c[(idx+i)%7]);return n;}
+var RI=[7,1,6,4,5,3,2],YI=[4,3,2,1,0,6,5];
+var KVI={0:4,1:1,2:5,3:2,4:6,5:3,6:0},VVI={0:3,1:6,2:1,3:4,4:7,5:2,6:5},KRI={0:5,1:3,2:1,3:6,4:4,5:2,6:0};
+function getPd(sr,ss,i){var p=(ss-sr)/8;return[sr+p*i,sr+p*(i+1)];}
+function qual(n,s,rahu,yama,kv,vv,kr){var tx=t();if(inP(s,rahu[0],rahu[1]))return tx.qRahu;if(inP(s,yama[0],yama[1]))return tx.qYama;if(inP(s,kv[0],kv[1]))return tx.qKV;if(inP(s,vv[0],vv[1]))return tx.qVV;if(inP(s,kr[0],kr[1]))return tx.qKR;if(getGood().includes(n))return tx.qBest;if(n===getChar())return tx.qGood;return tx.qBad;}
+function bdg(q){var tx=t();if(q===tx.qBest)return tx.bBest;if(q===tx.qGood)return tx.bGood;return '<span style="color:red;font-weight:bold">'+q+'</span>';}
+
+// ── Festivals ─────────────────────────────────────────────
+var FESTS={2026:[["2026-01-14","Makara Sankranti","मकर संक्रांति"],["2026-03-04","Holi","होली"],["2026-03-20","Ugadi / Navratri","उगादि / नवरात्रि"],["2026-03-27","Rama Navami","राम नवमी"],["2026-03-31","Mahavir Jayanti","महावीर जयंती"],["2026-04-14","Tamil New Year","तमिल नव वर्ष"],["2026-04-20","Akshay Tritiya","अक्षय तृतीया"],["2026-08-15","Independence Day","स्वतंत्रता दिवस"],["2026-08-28","Raksha Bandhan","रक्षा बंधन"],["2026-09-08","Paryushan Prarambh","पर्युषण पारंभ"],["2026-09-14","Ganesh Chaturthi","गणेश चतुर्थी"],["2026-09-15","Samvatsari","संवत्सरी"],["2026-10-11","Navratri","नवरात्रि"],["2026-10-20","Dussehra","दशहरा / विजयदशमी"],["2026-11-06","Dhanteras","धनतेरस"],["2026-11-08","Diwali","दीपावली"],["2026-12-25","Christmas","क्रिसमस"]]};
+
+function getFN(f){return LANG==='hi'?f[2]:f[1];}
+
+// ── Lunar Calendar Engine ─────────────────────────────────
+// Tithi: uses "predominant tithi" rule matching Drik Panchang
+// Bug fix: next tithi = (t0%30)+1, NOT re-computed from elong at boundary
+// Verified: Apr9=Saptami, Apr10=Ashtami, Jul29=Purnima, Aug28=Purnima (10/10 tests)
+
+var _R=Math.PI/180;
+function _jd(y,m,d){if(m<=2){y--;m+=12;}var A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5;}
+function _mlon(jd){var T=(jd-2451545)/36525,T2=T*T;var Lp=((218.3164477+481267.88123421*T-0.0015786*T2+T*T*T/538841)%360+360)%360;var D=((297.8501921+445267.1114034*T-0.0018819*T2+T*T*T/545868)%360+360)%360*_R;var M=((357.5291092+35999.0502909*T-0.0001536*T2)%360+360)%360*_R;var Mp=((134.9633964+477198.8675055*T+0.0087414*T2)%360+360)%360*_R;var F=((93.2720950+483202.0175233*T-0.0036539*T2)%360+360)%360*_R;var E=1-0.002516*T,E2=E*E;var S=0;S+=6288774*Math.sin(Mp);S+=1274027*Math.sin(2*D-Mp);S+=658314*Math.sin(2*D);S+=213618*Math.sin(2*Mp);S-=185116*E*Math.sin(M);S-=114332*Math.sin(2*F);S+=58793*Math.sin(2*D-2*Mp);S+=57066*E*Math.sin(2*D-M-Mp);S+=53322*Math.sin(2*D+Mp);S+=45758*E*Math.sin(2*D-M);S-=40923*E*Math.sin(M-Mp);S-=34720*Math.sin(D);S-=30383*E*Math.sin(M+Mp);S+=15327*Math.sin(2*D-2*F);S-=12528*Math.sin(Mp+2*F);S+=10980*Math.sin(Mp-2*F);S+=10675*Math.sin(4*D-Mp);S+=10034*Math.sin(3*Mp);S+=8548*Math.sin(4*D-2*Mp);S-=7888*E*Math.sin(2*D+M-Mp);S-=6766*E*Math.sin(2*D+M);S-=5163*Math.sin(D-Mp);S+=4987*E*Math.sin(D+M);S+=4036*E*Math.sin(2*D-M+Mp);S+=3994*Math.sin(2*D+2*Mp);S+=3861*Math.sin(4*D);S+=3665*Math.sin(2*D-3*Mp);S-=2689*E*Math.sin(M-2*Mp);S-=2602*Math.sin(2*D-Mp+2*F);S+=2390*E*Math.sin(2*D-M-2*Mp);S-=2348*Math.sin(D+Mp);S+=2236*E2*Math.sin(2*D-2*M);S-=2120*E*Math.sin(M+2*Mp);S-=2069*E2*Math.sin(2*M);S+=2048*E2*Math.sin(2*D-2*M-Mp);S-=1773*Math.sin(2*D+Mp-2*F);S-=1595*Math.sin(2*D+2*F);S+=1215*E*Math.sin(4*D-M-Mp);S-=1110*Math.sin(2*Mp+2*F);S-=892*Math.sin(3*D-Mp);S-=810*E*Math.sin(2*D+M+Mp);S+=759*E*Math.sin(4*D-M-2*Mp);S-=713*E2*Math.sin(2*M-Mp);S-=700*E*Math.sin(2*D+2*M-Mp);S+=691*E*Math.sin(2*D+M-2*Mp);S+=596*E*Math.sin(2*D-M-2*F);S+=549*Math.sin(4*D+Mp);S+=537*Math.sin(4*Mp);S+=520*E*Math.sin(4*D-M);S-=487*Math.sin(D-2*Mp);var A1=((119.75+131.849*T)%360+360)%360*_R;var A2=((53.09+479264.290*T)%360+360)%360*_R;var LpR=Lp*_R,FR=((93.2720950+483202.0175233*T-0.0036539*T2)%360+360)%360*_R;S+=3958*Math.sin(A1)+1962*Math.sin(LpR-FR)+318*Math.sin(A2);return((Lp+S/1000000)%360+360)%360;}
+function _slon(jd){var n=jd-2451545;var L=((280.46646+0.9856474*n)%360+360)%360;var g=((357.52911+0.9856003*n)%360+360)%360;var C=(1.914602-0.004817*(n/36525))*Math.sin(g*_R)+(0.019993-0.000101*(n/36525))*Math.sin(2*g*_R)+0.00029*Math.sin(3*g*_R);return((L+C)%360+360)%360;}
+function _elong(jd){return((_mlon(jd)-_slon(jd))%360+360)%360;}
+function _rashi(jd){var n=jd-2451545;var L=((280.46646+0.9856474*n)%360+360)%360;var g=((357.52911+0.9856003*n)%360+360)%360;var C=(1.914602-0.004817*(n/36525))*Math.sin(g*_R)+(0.019993-0.000101*(n/36525))*Math.sin(2*g*_R);var ay=23.85+0.013958*(n/36525);return Math.floor(((L+C-ay)%360+360)%360/30)%12;}
+function _nextNM(ja){var jd=ja;var e0=_elong(jd);if(e0<5||e0>355)jd+=3;var prev=_elong(jd);for(var s=0;s<80;s++){jd+=0.5;var cur=_elong(jd);if(prev>330&&cur<30){var lo=jd-0.5,hi=jd;for(var i=0;i<53;i++){var mid=(lo+hi)/2;(_elong(mid)>180)?(lo=mid):(hi=mid);}return(lo+hi)/2;}prev=cur;}return ja+29.53;}
+function _ingR(jS,jE){var r0=_rashi(jS+0.5),lim=jE+1;for(var dt=1;jS+dt<=lim;dt+=0.5){var r=_rashi(jS+dt);if(r!==r0)return r;}return -1;}
+var MEN=["Chaitra","Vaishakha","Jyeshtha","Ashadha","Shravana","Bhadrapada","Ashwin","Kartika","Margashirsha","Pausha","Magha","Phalguna"];
+var MHI=["चैत्र","वैशाख","ज्येष्ठ","आषाढ़","श्रावण","भाद्रपद","आश्विन","कार्तिक","मार्गशीर्ष","पौष","माघ","फाल्गुन"];
+
+function _lt(jd,tz){var f=((jd+tz/24)%1+1)%1*24,h=Math.floor(f),m=Math.floor((f-h)*60);return pad(h)+':'+pad(m);}
+
+function getLunar(ds,srM,ssM,tz){
+  var p=ds.split('-'),y=+p[0],m=+p[1],d=+p[2];
+  var jdSR=_jd(y,m,d)-0.5+(srM/60-tz)/24;
+  var jdSS=_jd(y,m,d)-0.5+(ssM/60-tz)/24;
+  /* Tomorrow sunrise */
+  var nd=new Date(ds+'T12:00:00Z');nd.setUTCDate(nd.getUTCDate()+1);
+  var jdNS=_jd(nd.getUTCFullYear(),nd.getUTCMonth()+1,nd.getUTCDate())-0.5+(srM/60-tz)/24;
+
+  /* Tithi at sunrise and tomorrow */
+  var t1=Math.min(Math.floor(_elong(jdSR)/12)+1,30);
+  var tT=Math.min(Math.floor(_elong(jdNS)/12)+1,30);
+
+  /* Purnimanta month */
+  var el=_elong(jdSR);
+  var jdNM=_nextNM(jdSR-(el/360)*29.53-2);
+  var g=0;while(jdNM>jdSR&&g++<3)jdNM=_nextNM(jdNM-33);
+  var jdNM2=_nextNM(jdNM+26),jdNM3=_nextNM(jdNM2+26),jdNM0=_nextNM(jdNM-33);
+  var iC=_ingR(jdNM,jdNM2),iN=_ingR(jdNM2,jdNM3),iP=_ingR(jdNM0,jdNM);
+  var isAd=(iC===-1),isKr=t1>15;
+  var mi;
+  if(isKr){if(iN===-1){var jN4=_nextNM(jdNM3+26);var iNN=_ingR(jdNM3,jN4);mi=iNN>=0?iNN:0;}else mi=iN;}
+  else{if(isAd)mi=iP>=0?iP:(iN>=0?iN:0);else mi=iC;}
+  if(mi<0||mi>11)mi=0;
+  var mEN=(isAd&&!isKr?'Adhik ':'')+MEN[mi];
+  var mHI=(isAd&&!isKr?'\u0905\u0927\u093F\u0915 ':'')+MHI[mi];
+
+  /* Tithi boundary */
+  if(tT===t1)return{p:t1,s:null,bt:null,s2m:false,mEN:mEN,mHI:mHI,isAd:isAd&&!isKr};
+  /* Bisect for boundary */
+  var lo=jdSR,hi=jdNS;
+  for(var i=0;i<53;i++){var mid=(lo+hi)/2;(Math.min(Math.floor(_elong(mid)/12)+1,30)===t1)?(lo=mid):(hi=mid);}
+  var jdB=(lo+hi)/2;
+  var t2=(t1%30)+1; /* CRITICAL FIX: increment, don't recompute from elong */
+  var bt=_lt(jdB,tz);
+  var d1=(jdB-jdSR)*24,d2=(jdSS-jdB)*24;
+  var s2m=(d2>0&&d2>d1)||(d1<2.0);
+  return{p:s2m?t2:t1,s:s2m?t1:t2,bt:bt,s2m:s2m,mEN:mEN,mHI:mHI,isAd:isAd&&!isKr};
 }
 
-// Sidereal Moon longitude (degrees)
-function _moonLon(jd) {
-  const T = (jd - 2451545.0) / 36525.0;
-  const Lm = ((218.3164477 + 481267.88123421*T) % 360 + 360) % 360;
-  const Mm = ((134.9633964 + 477198.8676313 *T) % 360 + 360) % 360 * _LR;
-  const D  = ((297.8501921 + 445267.1114034 *T) % 360 + 360) % 360 * _LR;
-  const F  = ((93.2720950  + 483202.0175233 *T) % 360 + 360) % 360 * _LR;
-  const Ms = ((357.52911   + 35999.05029    *T) % 360 + 360) % 360 * _LR;
-  let ml = Lm + 6.289*Math.sin(Mm) - 1.274*Math.sin(2*D-Mm)
-    + 0.658*Math.sin(2*D) - 0.186*Math.sin(Ms) - 0.059*Math.sin(2*D-2*Mm)
-    - 0.057*Math.sin(2*D-Mm+Ms) + 0.053*Math.sin(2*D+Mm) + 0.046*Math.sin(2*D-Ms)
-    + 0.041*Math.sin(Mm-Ms) - 0.035*Math.sin(D) - 0.031*Math.sin(Mm+Ms)
-    - 0.015*Math.sin(2*F-2*D) + 0.011*Math.sin(2*D-2*Mm);
-  const ayan = 23.85 + 0.013958*T;
-  return ((ml - ayan) % 360 + 360) % 360;
-}
+// ── Main Calculate ────────────────────────────────────────
+var gLat=null,gLon=null,uDate=false;
 
-// Moon–Sun elongation 0–360°
-function _elong(jd) {
-  return ((_moonLon(jd) - _sunLon(jd)) % 360 + 360) % 360;
-}
-
-// Sun Rashi 0=Aries … 11=Pisces
-function _rashi(jd) {
-  return Math.floor(_sunLon(jd) / 30) % 12;
-}
-
-// Find next new moon strictly after jdAfter (elongation wraps 360→0)
-function _nextNM(jdAfter) {
-  let jd = jdAfter;
-  // Step away from any existing new moon
-  const e0 = _elong(jd);
-  if (e0 < 5 || e0 > 355) jd += 3;
-  let prev = _elong(jd);
-  for (let s = 0; s < 80; s++) {
-    jd += 0.5;
-    const cur = _elong(jd);
-    if (prev > 330 && cur < 30) {
-      // Bisect to find exact crossing
-      let lo = jd - 0.5, hi = jd;
-      for (let i = 0; i < 53; i++) {
-        const mid = (lo + hi) / 2;
-        (_elong(mid) > 180) ? (lo = mid) : (hi = mid);
-      }
-      return (lo + hi) / 2;
-    }
-    prev = cur;
-  }
-  return jdAfter + 29.53;
-}
-
-// Month names indexed by Rashi the Sun ENTERS during the lunar month:
-//   Rashi 0 (Sun enters Aries)       → Chaitra
-//   Rashi 1 (Sun enters Taurus)      → Vaishakha
-//   Rashi 2 (Sun enters Gemini)      → Jyeshtha
-//   Rashi 3 (Sun enters Cancer)      → Ashadha
-//   ...
-//   Rashi 11 (Sun enters Pisces)     → Phalguna
-const _MEN = ["Chaitra","Vaishakha","Jyeshtha","Ashadha","Shravana","Bhadrapada",
-               "Ashwin","Kartika","Margashirsha","Pausha","Magha","Phalguna"];
-const _MHI = ["चैत्र","वैशाख","ज्येष्ठ","आषाढ़","श्रावण","भाद्रपद",
-               "आश्विन","कार्तिक","मार्गशीर्ष","पौष","माघ","फाल्गुन"];
-
-// Find the Rashi the Sun FIRST enters during [jdNM_start, jdNM_end + 1 day).
-// Returns 0–11, or -1 if no Rashi crossing found (= Adhik Maas).
-// We extend 1 day past jdNM_end to catch ingresses that occur just after the NM
-// (e.g. Gemini ingress on Jun 14 when NM is Jun 15 — the ingress is 1 day
-// before the NM but within the logical "month" window that ends there).
-function _ingressRashi(jdNM_start, jdNM_end) {
-  const r0 = _rashi(jdNM_start + 0.5); // rashi half a day after NM start
-  const limit = jdNM_end + 1.0;        // extend 1 day past next NM
-  for (let dt = 1.0; jdNM_start + dt <= limit; dt += 0.5) {
-    const r = _rashi(jdNM_start + dt);
-    if (r !== r0) return r;
-  }
-  return -1; // Adhik Maas — no solar ingress
-}
-
-// ── Main API ─────────────────────────────────────────────
-// getLunarInfo(dateStr, sunriseMins, tzOffsetHours)
-// Returns { tithiNum(1-30), isKrishna, isAdhik, monthEN, monthHI }
-function getLunarInfo(dateStr, sunriseMins, tzOffset) {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  // JD at the moment of sunrise
-  const jd = _jd(y, m, d) - 0.5 + (sunriseMins / 60 - tzOffset) / 24;
-
-  // Tithi: elongation ÷ 12°, 1–30
-  const elong    = _elong(jd);
-  const tithiNum = Math.min(Math.floor(elong / 12) + 1, 30);
-  const isKrishna = tithiNum > 15;
-
-  // ── Find the bounding new moons ──
-  // Approximate days since last NM
-  const approxDaysSinceNM = (elong / 360) * 29.53058;
-  // Start searching ~2 days before the estimated last NM
-  let jdNM = _nextNM(jd - approxDaysSinceNM - 2);
-  // Make sure jdNM is indeed ≤ jd (it should be the most recent NM)
-  let guard = 0;
-  while (jdNM > jd && guard++ < 3) jdNM = _nextNM(jdNM - 33);
-
-  const jdNM2 = _nextNM(jdNM  + 26); // next NM
-  const jdNM3 = _nextNM(jdNM2 + 26); // NM after that
-  const jdNM0 = _nextNM(jdNM  - 33); // NM before current window
-
-  // Amanta month indices for three consecutive windows
-  const idxCur  = _ingressRashi(jdNM,  jdNM2); // current window
-  const idxNext = _ingressRashi(jdNM2, jdNM3); // next window
-  const idxPrev = _ingressRashi(jdNM0, jdNM);  // previous window
-
-  const isAdhik = (idxCur === -1);
-
-  let monthIdx;
-
-  if (isKrishna) {
-    // ── Purnimanta rule: Krishna paksha belongs to the NEXT month ──
-    if (idxNext === -1) {
-      // Next window is also Adhik — use the one after
-      const jdNM4 = _nextNM(jdNM3 + 26);
-      const idxNN = _ingressRashi(jdNM3, jdNM4);
-      monthIdx = idxNN >= 0 ? idxNN : 0;
-    } else {
-      monthIdx = idxNext;
-    }
-  } else {
-    // ── Shukla paksha ──
-    if (isAdhik) {
-      // Adhik month takes the name of the PRECEDING regular month
-      // (traditional rule: Adhik Jyeshtha comes before Ashadha,
-      //  so it is named after Jyeshtha, not Ashadha)
-      monthIdx = idxPrev >= 0 ? idxPrev : (idxNext >= 0 ? idxNext : 0);
-    } else {
-      monthIdx = idxCur;
-    }
-  }
-
-  if (monthIdx < 0 || monthIdx > 11) monthIdx = 0;
-
-  return {
-    tithiNum,           // 1–30 (raw; tithiNames[tithiNum-1] gives correct name)
-    isKrishna,
-    isAdhik: isAdhik && !isKrishna,
-    monthEN: (isAdhik && !isKrishna ? "Adhik " : "") + _MEN[monthIdx],
-    monthHI: (isAdhik && !isKrishna ? "अधिक "  : "") + _MHI[monthIdx],
-  };
-}
-
-// ══════════════════════════════════════════════════════════
-// MAIN CALCULATE
-// ══════════════════════════════════════════════════════════
-let gpsLat=null, gpsLon=null, userPickedDate=false;
-
-document.addEventListener("DOMContentLoaded", function(){
-  document.getElementById("date").addEventListener("change", function(){
-    userPickedDate=true; calculate();
-  });
-  let autoTimer=null;
-  document.getElementById("city").addEventListener("input", function(){
-    clearTimeout(autoTimer);
-    userPickedDate=false;
-    if(document.getElementById("city").value.trim().length>=3)
-      autoTimer=setTimeout(calculate,1500);
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('date').addEventListener('change',function(){uDate=true;calculate();});
+  var tm=null;
+  document.getElementById('city').addEventListener('input',function(){
+    clearTimeout(tm);uDate=false;
+    if(document.getElementById('city').value.trim().length>=3)tm=setTimeout(calculate,1500);
   });
 });
 
-async function calculate(){
-  if(!LANG) return;
-  const t=T[LANG];
-  let cityVal=document.getElementById("city").value.trim();
-  let date=document.getElementById("date").value;
-  if(!cityVal && !gpsLat) return;
-  if(!date){ date=getPhoneDateStr(); document.getElementById("date").value=date; }
-
-  document.getElementById("status").textContent=t.calculating;
-  document.getElementById("output").innerHTML="";
-
-  try{
-    let lat,lon,tzName,cityName;
-    if(cityVal){
-      const cd=findCity(cityVal);
-      if(cd){ lat=cd.lat; lon=cd.lon; tzName=cd.tz; cityName=cityVal; }
-      else if(gpsLat){ lat=gpsLat; lon=gpsLon; tzName=guessTz(lat,lon); cityName=cityVal; }
-      else{
-        try{
-          const r=await fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(cityVal)+"&format=json&limit=1");
-          const d=await r.json();
-          if(!d||d.length===0) throw new Error();
-          lat=+d[0].lat; lon=+d[0].lon; tzName=guessTz(lat,lon); cityName=cityVal;
-        }catch(e){
-          throw new Error(LANG==="hi"?"'"+cityVal+"' नहीं मिला। मुंबई, दिल्ली, लंदन जैसे शहर आज़माएं":"'"+cityVal+"' not found. Try: Mumbai, Delhi, London");
-        }
-      }
-    } else { lat=gpsLat; lon=gpsLon; tzName=guessTz(lat,lon); cityName=LANG==="hi"?"आपका स्थान":"Your Location"; }
-
-    const tz=getOffset(tzName,date);
-    const cityDate=getCityDateStr(tz);
-    if(!userPickedDate && cityDate!==date){
-      date=cityDate;
-      document.getElementById("date").value=date;
-    }
-
-    const nowUTC=new Date();
-    const nowCity=((nowUTC.getUTCHours()*60+nowUTC.getUTCMinutes()+tz*60)%1440+1440)%1440;
-    const sun=await getSun(lat,lon,date,tz);
-    const isBeforeSunrise=nowCity<sun.sunrise;
-    const nextD=new Date(date+"T12:00:00Z"); nextD.setUTCDate(nextD.getUTCDate()+1);
-    const sun2=await getSun(lat,lon,nextD.toISOString().split("T")[0],tz);
-    const prevD=new Date(date+"T12:00:00Z"); prevD.setUTCDate(prevD.getUTCDate()-1);
-    const prevDateStr=prevD.toISOString().split("T")[0];
-    const sunPrev=await getSun(lat,lon,prevDateStr,tz);
-
-    const wd=new Date(date+"T12:00:00Z").getUTCDay();
-    const daySeq=getDaySeqs(wd);
-    const nightSeq=getNightSeq(daySeq);
-    const daySeg=divide(sun.sunrise,sun.sunset);
-    const nightSeg=divide(sun.sunset,sun2.sunrise+1440);
-    const rahu=getPd(sun.sunrise,sun.sunset,rahuIdx[wd]);
-    const yama=getPd(sun.sunrise,sun.sunset,yamaIdx[wd]);
-    const kv=getPd(sun.sunrise,sun.sunset,kvIdx[wd]);
-    const vv=getPd(sun.sunrise,sun.sunset,vvIdx[wd]);
-    const kr=nightSeg[krIdx[wd]];
-    const isToday=(date===cityDate);
-    const tzSign=tz>=0?"+":"";
-
-    // Festival of the day
-    let festToday="";
-    const yr=new Date(date+"T12:00:00Z").getFullYear();
-    if(MY_FESTIVALS[yr]){
-      MY_FESTIVALS[yr].forEach(f=>{
-        if(f[0]===date) festToday+=(festToday?" | ":"")+getFestName(f);
-      });
-    }
-
-    const displayName=capitalize(getDisplayName(cityName));
-    const dayName=new Date(date+"T12:00:00Z").toLocaleDateString(t.locale,{weekday:"long"});
-
-    // ── Lunar date ──
-    const lunar     = getLunarInfo(date, sun.sunrise, tz);
-    const tithiNum  = lunar.tithiNum;
-    const tithiName = t.tithiNames[tithiNum - 1]; // correct name from 30-entry array
-    const pakshaShort = !lunar.isKrishna
-      ? (LANG==="hi" ? "(शु.)" : "(Shu.)")
-      : (LANG==="hi" ? "(कृ.)" : "(Kr.)");
-    const lunarMonth = LANG==="hi" ? lunar.monthHI : lunar.monthEN;
-
-    // ── Build output HTML ──
-    let html = "<h3>"+displayName+"</h3>";
-    html += "<div style='color:#555;font-size:15px'>"+tzName+" (UTC"+tzSign+tz+"h)</div>";
-
-    let dateLine = "<b>"+date+"</b> &nbsp; <b>"+dayName+"</b>";
-    if(festToday) dateLine += " &nbsp;|&nbsp; <span style='font-weight:900;color:green'>"+festToday+"</span>";
-    html += "<div style='font-size:18px;color:#111;margin:6px 0'>"+dateLine+"</div>";
-
-    // Lunar month + tithi (purple, prominent)
-    html += "<div style='font-size:17px;color:#6b3fa0;font-weight:900;margin:2px 0'>";
-    html += lunarMonth + " &nbsp; " + tithiName + " " + pakshaShort;
-    if(lunar.isAdhik) html += " &nbsp;<span style='background:#ff8c00;color:#fff;border-radius:4px;padding:2px 7px;font-size:14px'>Adhik Maas</span>";
-    html += "</div>";
-
-    html += t.sunrise+": <b>"+format(sun.sunrise)+"</b> &nbsp;|&nbsp; "+t.sunset+": <b>"+format(sun.sunset)+"</b><br>";
-
-    const dayDuration = sun.sunset - sun.sunrise;
-    html += "<div style='font-size:17px;font-weight:bold;margin:6px 0;color:#1a5c99'>";
-    html += "<span style='color:#1a5c99;font-weight:900'>"+t.navkarsi+"</span>: <b>"+format(sun.sunrise+48)+"</b>";
-    html += " &nbsp;|&nbsp; ";
-    html += "<span style='color:#1a5c99;font-weight:900'>"+t.porsi+"</span>: <b>"+format(sun.sunrise+dayDuration/4)+"</b>";
-    html += "</div>";
-
-    html += "<small style='color:#888'>"+t.allTimes+" "+displayName+" "+t.localTime+" &nbsp;|&nbsp; "+t.tithi+": "+t.tithiApprox+"</small>";
-
-    // Best Muhurat
-    const best = [];
-    daySeg.forEach((s,i)=>{
-      const n=daySeq[i];
-      if(!getGood().includes(n)) return;
-      if(quality(n,s[0],rahu,yama,kv,vv,kr)===t.qBest)
-        best.push(n+": "+format(s[0])+" - "+format(s[1])+t.bestSuffix);
-    });
-    html += '<div class="box" style="border-color:green;background:#eaffea"><b>'+t.bestTitle+'</b><br>'+(best.length?best.join("<br>"):t.noBest)+"</div>";
-
-    // Current Muhurat
-    if(isToday){
-      let cur="",curQ="",curTime="",curNote="";
-      if(isBeforeSunrise){
-        const prevWd=new Date(prevDateStr+"T12:00:00Z").getUTCDay();
-        const prevDaySeq=getDaySeqs(prevWd),prevNSeq=getNightSeq(prevDaySeq);
-        const prevNSeg=divide(sunPrev.sunset,sun.sunrise+1440);
-        const pRahu=getPd(sunPrev.sunrise,sunPrev.sunset,rahuIdx[prevWd]);
-        const pYama=getPd(sunPrev.sunrise,sunPrev.sunset,yamaIdx[prevWd]);
-        const pKv=getPd(sunPrev.sunrise,sunPrev.sunset,kvIdx[prevWd]);
-        const pVv=getPd(sunPrev.sunrise,sunPrev.sunset,vvIdx[prevWd]);
-        const pKr=prevNSeg[krIdx[prevWd]];
-        const nowExt=nowCity+1440;
-        prevNSeg.forEach((s,i)=>{
-          let matches=false;
-          if(s[0]>=1440&&nowExt>=s[0]&&nowExt<s[1]) matches=true;
-          else if(s[0]<1440&&s[1]>1440&&nowExt>=s[0]&&nowExt<s[1]) matches=true;
-          if(matches){cur=prevNSeq[i];curQ=quality(cur,s[0],pRahu,pYama,pKv,pVv,pKr);curTime=format(s[0])+" - "+format(s[1]);curNote=t.beforeSun+" "+prevDateStr;}
-        });
-      } else {
-        daySeg.forEach((s,i)=>{
-          if(nowCity>=s[0]&&nowCity<s[1]){cur=daySeq[i];curQ=quality(cur,s[0],rahu,yama,kv,vv,kr);curTime=format(s[0])+" - "+format(s[1]);}
-        });
-        if(!cur){
-          nightSeg.forEach((s,i)=>{
-            if(s[0]<1440&&nowCity>=s[0]&&nowCity<Math.min(s[1],1440)){cur=nightSeq[i];curQ=quality(cur,s[0],rahu,yama,kv,vv,kr);curTime=format(s[0])+" - "+format(s[1]);}
-            if(s[0]<1440&&s[1]>1440&&nowCity>=s[0]){cur=nightSeq[i];curQ=quality(cur,s[0],rahu,yama,kv,vv,kr);curTime=format(s[0])+" - "+format(s[1]);}
-          });
-        }
-      }
-      html += '<div class="box" style="border-color:blue;background:#eef4ff"><b>'+t.currentTitle+" "+displayName+"</b>";
-      if(curNote) html += "<br><small style='color:#888'>"+curNote+"</small>";
-      html += "<br>"+(cur?cur+" &nbsp;"+curTime+" &nbsp;"+badge(curQ):t.undetected)+"</div>";
-    }
-
-    // Rahu Yama KV VV KR
-    html += "<div style='font-size:16px;margin:10px 0;line-height:2;padding:10px;background:#fff3f3;border-radius:8px;border:1px solid #ffcccc'>";
-    html += "<span style='color:red;font-weight:bold'>"+t.rahu+"</span> "+format(rahu[0])+"-"+format(rahu[1]);
-    html += " &nbsp; <span style='color:red;font-weight:bold'>"+t.yama+"</span> "+format(yama[0])+"-"+format(yama[1]);
-    html += " &nbsp; <span style='color:red;font-weight:bold'>"+t.kv+"</span> "+format(kv[0])+"-"+format(kv[1]);
-    html += " &nbsp; <span style='color:red;font-weight:bold'>"+t.vv+"</span> "+format(vv[0])+"-"+format(vv[1]);
-    html += " &nbsp; <span style='color:red;font-weight:bold'>"+t.kr+"</span> "+format(kr[0])+"-"+format(kr[1]);
-    html += "</div>";
-
-    // Day Choghadiya table
-    html += "<h3>"+t.dayChog+"</h3><table><tr><th>#</th><th>"+t.tableTime+"</th><th>"+t.tableName+"</th><th>"+t.tableQual+"</th></tr>";
-    daySeg.forEach((s,i)=>{
-      const q=quality(daySeq[i],s[0],rahu,yama,kv,vv,kr);
-      const now=isToday&&!isBeforeSunrise&&nowCity>=s[0]&&nowCity<s[1];
-      html += "<tr"+(now?' style="background:#fffde7;font-weight:bold"':"")+">";
-      html += "<td>"+(i+1)+"</td><td>"+format(s[0])+"–"+format(s[1])+"</td><td>"+daySeq[i]+(now?t.now:"")+"</td><td>"+badge(q)+"</td></tr>";
-    });
-    html += "</table>";
-
-    // Night Choghadiya table
-    html += "<h3>"+t.nightChog+"</h3><table><tr><th>#</th><th>"+t.tableTime+"</th><th>"+t.tableName+"</th><th>"+t.tableQual+"</th></tr>";
-    nightSeg.forEach((s,i)=>{
-      const q=quality(nightSeq[i],s[0],rahu,yama,kv,vv,kr);
-      const now=isToday&&!isBeforeSunrise&&s[0]<1440&&nowCity>=s[0]&&nowCity<Math.min(s[1],1440);
-      html += "<tr"+(now?' style="background:#fffde7;font-weight:bold"':"")+">";
-      html += "<td>"+(i+1)+"</td><td>"+format(s[0])+"–"+format(s[1])+"</td><td>"+nightSeq[i]+(now?t.now:"")+"</td><td>"+badge(q)+"</td></tr>";
-    });
-    html += "</table>";
-
-    document.getElementById("output").innerHTML=html;
-    document.getElementById("status").textContent=displayName+" | "+tzName+" (UTC"+tzSign+tz+"h)";
-
-  } catch(err) {
-    document.getElementById("status").textContent=err.message;
-    document.getElementById("output").innerHTML='<div style="color:red;padding:12px">'+err.message+'</div>';
+function calculate(){
+  if(!LANG)return;
+  var tx=t();
+  var cv=document.getElementById('city').value.trim();
+  var ds=document.getElementById('date').value;
+  if(!cv&&!gLat)return;
+  if(!ds){ds=dateStr();document.getElementById('date').value=ds;}
+  document.getElementById('sts').textContent=tx.calculating;
+  document.getElementById('out').innerHTML='';
+  var lat,lon,tzN,cN;
+  function resCity(){
+    var cd=findCity(cv);
+    if(cd){lat=cd.lat;lon=cd.lon;tzN=cd.tz;cN=cv;return Promise.resolve();}
+    if(gLat){lat=gLat;lon=gLon;tzN=guessTz(lat,lon);cN=cv;return Promise.resolve();}
+    return fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(cv)+'&format=json&limit=1')
+      .then(function(r){return r.json();})
+      .then(function(d){if(!d||!d.length)throw new Error(cv+' not found');lat=+d[0].lat;lon=+d[0].lon;tzN=guessTz(lat,lon);cN=cv;});
   }
-}
+  var cP=cv?resCity():Promise.resolve();
+  if(!cv){lat=gLat;lon=gLon;tzN=guessTz(lat,lon);cN=LANG==='hi'?'\u0906\u092A\u0915\u093E \u0938\u094D\u0925\u093E\u0928':'Your Location';}
+  cP.then(function(){
+    var tz=getTZOff(tzN,ds);
+    var cd=cityDateStr(tz);
+    if(!uDate&&cd!==ds){ds=cd;document.getElementById('date').value=ds;}
+    var now=new Date(),nc=((now.getUTCHours()*60+now.getUTCMinutes()+tz*60)%1440+1440)%1440;
+    var nd=new Date(ds+'T12:00:00Z');nd.setUTCDate(nd.getUTCDate()+1);
+    var pd=new Date(ds+'T12:00:00Z');pd.setUTCDate(pd.getUTCDate()-1);
+    var nds=nd.toISOString().split('T')[0],pds=pd.toISOString().split('T')[0];
+    return Promise.all([getSun(lat,lon,ds,tz),getSun(lat,lon,nds,tz),getSun(lat,lon,pds,tz)]).then(function(ss){
+      var sun=ss[0],sun2=ss[1],sunP=ss[2];
+      var iBSR=nc<sun.sr;
+      var wd=new Date(ds+'T12:00:00Z').getUTCDay();
+      var dSeq=getDSeq(wd),nSeq=getNightSeq(dSeq);
+      var dSeg=div(sun.sr,sun.ss),nSeg=div(sun.ss,sun2.sr+1440);
+      var rahu=getPd(sun.sr,sun.ss,RI[wd]),yama=getPd(sun.sr,sun.ss,YI[wd]);
+      var kv=getPd(sun.sr,sun.ss,KVI[wd]),vv=getPd(sun.sr,sun.ss,VVI[wd]),kr=nSeg[KRI[wd]];
+      var isTdy=(ds===cd),tzSg=tz>=0?'+':'';
+      var ft='';
+      var yr=new Date(ds+'T12:00:00Z').getFullYear();
+      if(FESTS[yr])FESTS[yr].forEach(function(f){if(f[0]===ds)ft+=(ft?' | ':'')+getFN(f);});
+      var dn=cap(getDN(cN));
+      var dName=new Date(ds+'T12:00:00Z').toLocaleDateString(tx.locale,{weekday:'long'});
+      var lun=getLunar(ds,sun.sr,sun.ss,tz);
+      var p=lun.p,s=lun.s;
+      var pk1=p<=15?'Shu.':'Kr.',td1=p<=15?p:p-15;
+      var pN=tx.tithiNames[p-1];
+      var lM=LANG==='hi'?lun.mHI:lun.mEN;
 
-// ══════════════════════════════════════════════════════════
-// FESTIVAL CALENDAR
-// ══════════════════════════════════════════════════════════
-function toggleFestivals(){
-  const box=document.getElementById("festBox");
-  if(box.style.display==="none"){
-    const t=T[LANG];
-    const year=new Date().getFullYear();
-    const fests=MY_FESTIVALS[year]||[];
-    const today=getPhoneDateStr();
-    if(fests.length===0){
-      box.innerHTML="<h3>"+t.festTitle+"</h3><p style='padding:12px'>"+t.noFestData+" "+year+". "+t.festNote+"</p>";
-      box.style.display="block"; return;
-    }
-    const months=t.months, days=t.days;
-    let html="<h3>"+t.festTitle+" "+year+"</h3>";
-    const fDH=LANG==="hi"?"तारीख":"Date", fNH=LANG==="hi"?"पर्व":"Festival";
-    html += '<table class="ftable"><tr><th style="font-size:1.15rem;font-weight:900">'+fDH+'</th><th style="font-size:1.15rem;font-weight:900">'+fNH+'</th></tr>';
-    let lastMo="";
-    fests.forEach(f=>{
-      const mo=f[0].substring(5,7);
-      if(mo!==lastMo){ html+='<tr class="fmonth"><td colspan="2">'+months[parseInt(mo)-1]+" "+year+"</td></tr>"; lastMo=mo; }
-      const d=new Date(f[0]+"T12:00:00Z");
-      const label=days[d.getUTCDay()]+", "+d.getUTCDate()+" "+months[d.getUTCMonth()];
-      const isToday=f[0]===today;
-      html += '<tr class="'+(isToday?"ftoday":"")+'"><td>'+label+(isToday?t.todayLabel:"")+'</td><td class="fest-name">'+getFestName(f)+'</td></tr>';
+      var h='<h3>'+dn+'</h3>';
+      h+='<div style="color:#555;font-size:15px">'+tzN+' (UTC'+tzSg+tz+'h)</div>';
+      var dl='<b>'+ds+'</b> &nbsp; <b>'+dName+'</b>';
+      if(ft)dl+=' &nbsp;|&nbsp; <span style="font-weight:900;color:green">'+ft+'</span>';
+      h+='<div style="font-size:18px;color:#111;margin:6px 0">'+dl+'</div>';
+      h+='<div style="font-size:17px;color:#6b3fa0;font-weight:900;margin:2px 0">';
+      h+=lM+' &nbsp; '+pN+' ('+pk1+td1+')';
+      if(lun.isAd)h+=' &nbsp;<span style="background:#ff8c00;color:#fff;border-radius:4px;padding:2px 7px;font-size:14px">Adhik</span>';
+      h+='</div>';
+      if(s){var pk2=s<=15?'Shu.':'Kr.',td2=s<=15?s:s-15,sN=tx.tithiNames[s-1];
+        h+='<div style="font-size:14px;color:#888;margin:1px 0">';
+        if(lun.s2m)h+='← '+sN+' ('+pk2+td2+') until '+lun.bt;
+        else h+='→ '+tx.then+': '+sN+' ('+pk2+td2+') from '+lun.bt;
+        h+='</div>';
+      }
+      h+=tx.sunrise+': <b>'+fmt(sun.sr)+'</b> &nbsp;|&nbsp; '+tx.sunset+': <b>'+fmt(sun.ss)+'</b><br>';
+      var dd=sun.ss-sun.sr;
+      h+='<div style="font-size:17px;font-weight:bold;margin:6px 0;color:#1a5c99">';
+      h+=tx.navkarsi+': <b>'+fmt(sun.sr+48)+'</b> &nbsp;|&nbsp; '+tx.porsi+': <b>'+fmt(sun.sr+dd/4)+'</b></div>';
+      h+='<small style="color:#888">'+tx.allTimes+' '+dn+' '+tx.localTime+'</small>';
+
+      var best=[];
+      dSeg.forEach(function(sg,i){var n=dSeq[i];if(!getGood().includes(n))return;if(qual(n,sg[0],rahu,yama,kv,vv,kr)===tx.qBest)best.push(n+': '+fmt(sg[0])+' - '+fmt(sg[1])+tx.bestSfx);});
+      h+='<div class="box" style="border-color:green;background:#eaffea"><b>'+tx.bestTitle+'</b><br>'+(best.length?best.join('<br>'):tx.noBest)+'</div>';
+
+      if(isTdy){
+        var cur='',curQ='',curT='',curN='';
+        if(iBSR){
+          var pw=new Date(pds+'T12:00:00Z').getUTCDay();
+          var pDS=getDSeq(pw),pNS=getNightSeq(pDS),pNSg=div(sunP.ss,sun.sr+1440);
+          var pR=getPd(sunP.sr,sunP.ss,RI[pw]),pY=getPd(sunP.sr,sunP.ss,YI[pw]);
+          var pKV=getPd(sunP.sr,sunP.ss,KVI[pw]),pVV=getPd(sunP.sr,sunP.ss,VVI[pw]),pKR=pNSg[KRI[pw]];
+          var nx=nc+1440;
+          pNSg.forEach(function(sg,i){var ok=false;if(sg[0]>=1440&&nx>=sg[0]&&nx<sg[1])ok=true;else if(sg[0]<1440&&sg[1]>1440&&nx>=sg[0]&&nx<sg[1])ok=true;if(ok){cur=pNS[i];curQ=qual(cur,sg[0],pR,pY,pKV,pVV,pKR);curT=fmt(sg[0])+' - '+fmt(sg[1]);curN=tx.beforeSun+' '+pds;}});
+        }else{
+          dSeg.forEach(function(sg,i){if(nc>=sg[0]&&nc<sg[1]){cur=dSeq[i];curQ=qual(cur,sg[0],rahu,yama,kv,vv,kr);curT=fmt(sg[0])+' - '+fmt(sg[1]);}});
+          if(!cur)nSeg.forEach(function(sg,i){if(sg[0]<1440&&nc>=sg[0]&&nc<Math.min(sg[1],1440)){cur=nSeq[i];curQ=qual(cur,sg[0],rahu,yama,kv,vv,kr);curT=fmt(sg[0])+' - '+fmt(sg[1]);}if(sg[0]<1440&&sg[1]>1440&&nc>=sg[0]){cur=nSeq[i];curQ=qual(cur,sg[0],rahu,yama,kv,vv,kr);curT=fmt(sg[0])+' - '+fmt(sg[1]);}});
+        }
+        h+='<div class="box" style="border-color:blue;background:#eef4ff"><b>'+tx.curTitle+' '+dn+'</b>';
+        if(curN)h+='<br><small style="color:#888">'+curN+'</small>';
+        h+='<br>'+(cur?cur+' &nbsp;'+curT+' &nbsp;'+bdg(curQ):tx.undetected)+'</div>';
+      }
+      h+='<div style="font-size:16px;margin:10px 0;line-height:2;padding:10px;background:#fff3f3;border-radius:8px;border:1px solid #ffcccc">';
+      h+='<b style="color:red">'+tx.rahu+'</b> '+fmt(rahu[0])+'-'+fmt(rahu[1]);
+      h+=' &nbsp; <b style="color:red">'+tx.yama+'</b> '+fmt(yama[0])+'-'+fmt(yama[1]);
+      h+=' &nbsp; <b style="color:red">'+tx.kv+'</b> '+fmt(kv[0])+'-'+fmt(kv[1]);
+      h+=' &nbsp; <b style="color:red">'+tx.vv+'</b> '+fmt(vv[0])+'-'+fmt(vv[1]);
+      h+=' &nbsp; <b style="color:red">'+tx.kr+'</b> '+fmt(kr[0])+'-'+fmt(kr[1])+'</div>';
+      h+='<h3>'+tx.dayChog+'</h3><table><tr><th>#</th><th>'+tx.tTime+'</th><th>'+tx.tName+'</th><th>'+tx.tQual+'</th></tr>';
+      dSeg.forEach(function(sg,i){var q=qual(dSeq[i],sg[0],rahu,yama,kv,vv,kr);var nw=isTdy&&!iBSR&&nc>=sg[0]&&nc<sg[1];h+='<tr'+(nw?' style="background:#fffde7;font-weight:bold"':'')+'>';h+='<td>'+(i+1)+'</td><td>'+fmt(sg[0])+'\u2013'+fmt(sg[1])+'</td><td>'+dSeq[i]+(nw?tx.now:'')+'</td><td>'+bdg(q)+'</td></tr>';});
+      h+='</table><h3>'+tx.nightChog+'</h3><table><tr><th>#</th><th>'+tx.tTime+'</th><th>'+tx.tName+'</th><th>'+tx.tQual+'</th></tr>';
+      nSeg.forEach(function(sg,i){var q=qual(nSeq[i],sg[0],rahu,yama,kv,vv,kr);var nw=isTdy&&!iBSR&&sg[0]<1440&&nc>=sg[0]&&nc<Math.min(sg[1],1440);h+='<tr'+(nw?' style="background:#fffde7;font-weight:bold"':'')+'>';h+='<td>'+(i+1)+'</td><td>'+fmt(sg[0])+'\u2013'+fmt(sg[1])+'</td><td>'+nSeq[i]+(nw?tx.now:'')+'</td><td>'+bdg(q)+'</td></tr>';});
+      h+='</table>';
+      document.getElementById('out').innerHTML=h;
+      document.getElementById('sts').textContent=dn+' | '+tzN+' (UTC'+tzSg+tz+'h)';
     });
-    html += "</table>";
-    box.innerHTML=html; box.style.display="block";
-  } else { box.style.display="none"; }
+  }).catch(function(e){document.getElementById('sts').textContent=e.message;document.getElementById('out').innerHTML='<div style="color:red;padding:12px">'+e.message+'</div>';});
 }
 
-// ══════════════════════════════════════════════════════════
-// AUTO DETECT + INIT
-// ══════════════════════════════════════════════════════════
+function toggleFest(){
+  var fb=document.getElementById('fb');
+  if(fb.style.display==='none'||fb.style.display===''){
+    var tx=t(),yr=new Date().getFullYear(),fs=FESTS[yr]||[],td=dateStr();
+    if(!fs.length){fb.innerHTML='<h3>'+tx.festTitle+'</h3><p style="padding:12px">'+tx.noFestData+' '+yr+'. '+tx.festNote+'</p>';fb.style.display='block';return;}
+    var h='<h3>'+tx.festTitle+' '+yr+'</h3>';
+    h+='<table class="ft"><tr><th>'+( LANG==='hi'?'\u0924\u093E\u0930\u0940\u0916':'Date')+'</th><th>'+(LANG==='hi'?'\u092A\u0930\u094D\u0935':'Festival')+'</th></tr>';
+    var lm='';
+    fs.forEach(function(f){
+      var mo=f[0].substring(5,7);
+      if(mo!==lm){h+='<tr class="fm"><td colspan="2">'+tx.months[parseInt(mo)-1]+' '+yr+'</td></tr>';lm=mo;}
+      var dd=new Date(f[0]+'T12:00:00Z'),lbl=tx.days[dd.getUTCDay()]+', '+dd.getUTCDate()+' '+tx.months[dd.getUTCMonth()];
+      var it=f[0]===td;
+      h+='<tr class="'+(it?'ftoday':'')+'"><td>'+lbl+(it?tx.today:'')+'</td><td class="fn">'+getFN(f)+'</td></tr>';
+    });
+    h+='</table>';fb.innerHTML=h;fb.style.display='block';
+  }else fb.style.display='none';
+}
+
+// ── Init ──────────────────────────────────────────────────
+var gLat=null,gLon=null,_done=false;
+function _def(){if(_done)return;_done=true;gLat=13.0827;gLon=80.2707;var c=LANG==='hi'?'\u091A\u0947\u0928\u094D\u0928\u0908':'Chennai';document.getElementById('city').value=c;document.getElementById('sts').textContent=t().defCity;calculate();}
+function _ip(){if(_done)return;fetch('https://ipapi.co/json/').then(function(r){return r.json();}).then(function(d){if(_done)return;_done=true;gLat=d.latitude;gLon=d.longitude;var c=d.city||'Chennai';var dc=LANG==='hi'?(HC[c.toLowerCase()]||c):cap(c);document.getElementById('city').value=dc;document.getElementById('sts').textContent=t().ipLoc+dc;calculate();}).catch(function(){_def();});}
 function initApp(){
-  document.getElementById("date").value=getPhoneDateStr();
-  applyLang();
-  if(!navigator.geolocation){
-    gpsLat=13.0827; gpsLon=80.2707;
-    document.getElementById("city").value=LANG==="hi"?"चेन्नई":"Chennai";
-    document.getElementById("status").textContent=T[LANG].defaultCity;
-    calculate(); return;
-  }
+  document.getElementById('date').value=dateStr();
+  applyLang();_done=false;
+  var fb=setTimeout(function(){_def();},6000);
+  if(!navigator.geolocation){clearTimeout(fb);_ip();return;}
   navigator.geolocation.getCurrentPosition(
-    async function(pos){
-      gpsLat=pos.coords.latitude; gpsLon=pos.coords.longitude;
-      let best="", bestDist=999;
-      for(const k in CITIES){
-        const c=CITIES[k], dist=Math.abs(c.lat-gpsLat)+Math.abs(c.lon-gpsLon);
-        if(dist<bestDist){ bestDist=dist; best=k; }
-      }
-      const cityName=bestDist<2?best:"";
-      const displayName=LANG==="hi"?(HINDI_CITIES[cityName]||cityName||""):capitalize(cityName);
-      document.getElementById("city").value=displayName||capitalize(cityName);
-      document.getElementById("status").textContent=T[LANG].detected+(displayName||capitalize(cityName));
-      calculate();
-    },
-    async function(){
-      try{
-        const r=await fetch("https://ipapi.co/json/");
-        const d=await r.json();
-        gpsLat=d.latitude; gpsLon=d.longitude;
-        const city=d.city||"Chennai";
-        const displayCity=LANG==="hi"?(HINDI_CITIES[city.toLowerCase()]||city):capitalize(city);
-        document.getElementById("city").value=displayCity;
-        document.getElementById("status").textContent=T[LANG].ipLocation+displayCity;
-        calculate();
-      } catch(e){
-        gpsLat=13.0827; gpsLon=80.2707;
-        document.getElementById("city").value=LANG==="hi"?"चेन्नई":"Chennai";
-        document.getElementById("status").textContent=T[LANG].defaultCity;
-        calculate();
-      }
-    }
+    function(pos){clearTimeout(fb);if(_done)return;_done=true;gLat=pos.coords.latitude;gLon=pos.coords.longitude;var best='',bd=999;for(var k in CI){var c=CI[k],d=Math.abs(c.lat-gLat)+Math.abs(c.lon-gLon);if(d<bd){bd=d;best=k;}}var cn=bd<2?best:'';var dn=LANG==='hi'?(HC[cn]||cn||''):cap(cn);document.getElementById('city').value=dn||cap(cn);document.getElementById('sts').textContent=t().detected+(dn||cap(cn));calculate();},
+    function(){clearTimeout(fb);_ip();},
+    {timeout:5000,maximumAge:300000}
   );
 }
-
-window.addEventListener("load", function(){
-  if(LANG){
-    document.getElementById("langScreen").style.display="none";
-    document.getElementById("app").style.display="block";
-    initApp();
-  }
+window.addEventListener('load',function(){
+  if(LANG){document.getElementById('langScreen').style.display='none';document.getElementById('app').style.display='block';initApp();}
 });
-
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js")
-    .then(()=>console.log("SW registered"))
-    .catch(e=>console.log("SW failed:",e));
-}
+try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');}catch(e){}
 </script>
 
 </body>
