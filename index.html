@@ -179,7 +179,7 @@ function cap(s){if(!s)return s;return s.split(' ').map(function(w){return w.char
 function dateStr(){var n=new Date();return n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate());}
 function pad(n){return String(n).padStart(2,'0');}
 function cityDateStr(tz){var now=new Date(),d=new Date(now.getTime()+tz*3600000);return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate());}
-function fmt(m){m=((m%1440)+1440)%1440;var h=Math.floor(m/60),mm=Math.round(m%60),ap=h<12?'AM':'PM',h12=h%12===0?12:h%12;return h12+':'+pad(mm)+' '+ap;}
+function fmt(m){m=((m%1440)+1440)%1440;var h=Math.floor(m/60),mm=Math.round(m%60);if(mm===60){mm=0;h++;}if(h>=24)h=0;var ap=h<12?'AM':'PM',h12=h%12===0?12:h%12;return h12+':'+pad(mm)+' '+ap;}
 function div(s,e){var p=(e-s)/8,a=[];for(var i=0;i<8;i++)a.push([s+i*p,s+(i+1)*p]);return a;}
 function inP(v,s,e){return v>=s&&v<e;}
 
