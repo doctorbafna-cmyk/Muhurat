@@ -667,7 +667,6 @@ async function calculate(){
     if(cityVal){
       const cd=findCity(cityVal);
       if(cd){ lat=cd.lat; lon=cd.lon; tzName=cd.tz; cityName=cityVal; }
-      else if(gpsLat){ lat=gpsLat; lon=gpsLon; tzName=guessTz(lat,lon); cityName=cityVal; }
       else{
         try{
           const r=await fetch("https://nominatim.openstreetmap.org/search?q="+encodeURIComponent(cityVal)+"&format=json&limit=1");
