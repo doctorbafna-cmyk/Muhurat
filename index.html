@@ -560,7 +560,12 @@ function _ingressRashi(jdNM_start, jdNM_end) {
 function getLunarInfo(dateStr, sunriseMins, tzOffset) {
   const [y, m, d] = dateStr.split("-").map(Number);
   // JD at the moment of sunrise
-  const jd = _jd(y, m, d) - 0.5 + (sunriseMins / 60 - tzOffset) / 24;
+  // NOTE: _jd(y,m,d) already returns the Julian Day for 0h UT of that date,
+  // so we only add the fractional-day offset to reach sunrise — no extra
+  // -0.5 here (that bug shifted every Tithi calc back by 12 hours, which is
+  // why the Tithi lagged by roughly a day and only self-corrected whenever
+  // a short/kshaya Tithi happened to absorb the difference).
+  const jd = _jd(y, m, d) + (sunriseMins / 60 - tzOffset) / 24;
 
   // Tithi: elongation ÷ 12°, 1–30
   const elong    = _elong(jd);
