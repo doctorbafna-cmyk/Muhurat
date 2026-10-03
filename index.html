@@ -85,7 +85,7 @@ th{background:#f0f0f0;}
     <button id="calcBtn" onclick="calculate()">Calculate</button>
     <button id="festBtn" onclick="toggleFestivals()">🪔 Festival Calendar</button>
     <button id="vowLangBtn" onclick="toggleVowLang()">Language: हिंदी / Hindi</button>
-    <button id="pachBtn" onclick="togglePachkhan()">🙏 Pachkhan</button>
+    <button id="pachBtn" onclick="togglePachkhan()">🙏 Mangalpath & Pachkhan</button>
     <button id="niyamBtn" onclick="toggleNiyam()">📿 14 Niyam</button>
     <div id="festBox"></div>
     <div id="pachBox"></div>
@@ -106,7 +106,7 @@ const T = {
     placeholder:"Enter City Name",
     calcBtn:"Calculate",
     festBtn:"🪔 Festival Calendar",
-    pachBtn:"🙏 Pachkhan",
+    pachBtn:"🙏 Mangalpath & Pachkhan",
     niyamBtn:"📿 14 Niyam",
     pachTitle:"Pachkhan",
     niyamTitle:"14 Niyam",
@@ -154,7 +154,7 @@ const T = {
     placeholder:"शहर का नाम लिखें",
     calcBtn:"गणना करें",
     festBtn:"🪔 पर्व कैलेंडर",
-    pachBtn:"🙏 पच्चक्खाण",
+    pachBtn:"🙏 मंगलपाठ व पच्चक्खाण",
     niyamBtn:"📿 चौदह नियम",
     pachTitle:"पच्चक्खाण",
     niyamTitle:"चौदह नियम",
@@ -730,10 +730,31 @@ async function calculate(){
     const lunar     = getLunarInfo(date, sun.sunrise, tz);
     const tithiNum  = lunar.tithiNum;
     const tithiName = t.tithiNames[tithiNum - 1]; // correct name from 30-entry array
-    const pakshaShort = !lunar.isKrishna
+    const pakshaOf = n => (n<=15)
       ? (LANG==="hi" ? "(शुक्ल)" : "(Shukla)")
       : (LANG==="hi" ? "(कृष्ण)" : "(Krishna)");
+    const pakshaShort = pakshaOf(tithiNum);
     const lunarMonth = LANG==="hi" ? lunar.monthHI : lunar.monthEN;
+
+    // ── Kshaya / Vriddhi detection ──
+    // Compare TODAY's sunrise-Tithi with TOMORROW's sunrise-Tithi (traditional
+    // Panchang method). If the Tithi jumps by 2 instead of 1, a Tithi was lost
+    // entirely between the two sunrises (kshaya) — show both names combined,
+    // same as a printed Panchang would. If it jumps by 0, the same Tithi
+    // reaches two consecutive sunrises (vriddhi) — shown naturally as the
+    // same name on both days, no combining needed.
+    let tithiDisplay = tithiName + " " + pakshaShort;
+    let isKshayaDay = false;
+    try{
+      const lunarNext = getLunarInfo(nextD.toISOString().split("T")[0], sun2.sunrise, tz);
+      const diff = ((lunarNext.tithiNum - tithiNum) % 30 + 30) % 30;
+      if(diff===2){
+        isKshayaDay = true;
+        const skippedNum  = (tithiNum % 30) + 1; // the Tithi that never touches a sunrise
+        const skippedName = t.tithiNames[skippedNum - 1];
+        tithiDisplay = tithiName + "-" + skippedName + " " + pakshaOf(skippedNum);
+      }
+    }catch(e){ /* if tomorrow's sunrise/tithi can't be computed, just show today's Tithi alone */ }
 
     // ── Build output HTML ──
     let html = "<h3>"+displayName+"</h3>";
@@ -745,7 +766,7 @@ async function calculate(){
 
     // Lunar month + tithi (purple, prominent)
     html += "<div style='font-size:17px;color:#6b3fa0;font-weight:900;margin:2px 0'>";
-    html += lunarMonth + " &nbsp; " + tithiName + " " + pakshaShort;
+    html += lunarMonth + " &nbsp; " + tithiDisplay;
     if(lunar.isAdhik) html += " &nbsp;<span style='background:#ff8c00;color:#fff;border-radius:4px;padding:2px 7px;font-size:14px'>Adhik Maas</span>";
     html += "</div>";
 
@@ -847,6 +868,7 @@ async function calculate(){
 // PACHKHAN (verses) — Hindi original, transcribed from Padmodaya
 // ══════════════════════════════════════════════════════════
 const PACHKHAN_HI=[
+["मंगलपाठ","चत्तारि मंगलं,<br>अरिहंता मंगलं,<br>सिद्धा मंगलं,<br>साहू मंगलं,<br>केवलिपण्णत्तो धम्मो मंगलं ॥<br><br>चत्तारि लोगुत्तमा,<br>अरिहंता लोगुत्तमा,<br>सिद्धा लोगुत्तमा,<br>साहू लोगुत्तमा,<br>केवलिपण्णत्तो धम्मो लोगुत्तमा ॥<br><br>चत्तारि सरणं पव्वज्जामि,<br>अरिहंता सरणं पव्वज्जामि,<br>सिद्धा सरणं पव्वज्जामि,<br>साहू सरणं पव्वज्जामि,<br>केवलिपण्णत्तो धम्मो सरणं पव्वज्जामि ॥<br><br>अरिहंतों का शरणा,<br>सिद्धो का शरणा,<br>साधुओं का शरणा,<br>केवलिप्ररूपित दया धर्म का शरणा<br><br>चार शरणा, दुर्गति हरणा और शरणा नहीं कोय,<br>जो भवि प्राणी आदरे तो अजर अमर होय ॥"],
 ["नवकारसी","उगए सूरे नमुक्कारसहियं पच्चक्खामि चउव्विहं पि आहारं-असणं पाणं खाइमं साइमं अन्नत्थणाभोगेणं सहसागारेणं वोसिरामि।"],
 ["पोरसी","उगए सूरे पोरिसिं पच्चक्खामि चउव्विहं पि आहारं-असणं पाणं खाइमं साइमं अन्नत्थणाभोगेणं सहसागारेणं, पच्छन्नकालेणं, दिसामोहेणं, साहुवयणेणं, सव्वसमाहि-वत्तियागारेणं वोसिरामि।"],
 ["डेढ़ पोरसी","उगए सूरे साड्ढपोरिसिं पच्चक्खामि चउव्विहं पि आहारं-असणं पाणं खाइमं साइमं अन्नत्थणाभोगेणं सहसागारेणं, पच्छन्नकालेणं, दिसामोहेणं, साहुवयणेणं, सव्वसमाहि-वत्तियागारेणं वोसिरामि।"],
@@ -863,6 +885,7 @@ const PACHKHAN_HI=[
 // PACHKHAN — English (mantra lines given as Roman transliteration so they can
 // still be recited; the two explanatory notes are translated in meaning)
 const PACHKHAN_EN=[
+["Mangalpath","Chattari mangalam,<br>Arihanta mangalam,<br>Siddha mangalam,<br>Sahu mangalam,<br>Kevalipannatto dhammo mangalam.<br><br>Chattari loguttama,<br>Arihanta loguttama,<br>Siddha loguttama,<br>Sahu loguttama,<br>Kevalipannatto dhammo loguttama.<br><br>Chattari saranam pavvajjami,<br>Arihanta saranam pavvajjami,<br>Siddha saranam pavvajjami,<br>Sahu saranam pavvajjami,<br>Kevalipannatto dhammo saranam pavvajjami.<br><br>Arihanton ka sharana,<br>Siddho ka sharana,<br>Sadhuon ka sharana,<br>Kevali-prarupit daya dharma ka sharana.<br><br>Chaar sharana, durgati harana aur sharana nahin koy,<br>Jo bhavi prani aadare to ajar amar hoy."],
 ["Navkarsi","Ugae sure namukkarsahiyam pachchakkhami chauvviham pi aaharam-asanam paanam khaimam saimam annatthanabhogenam sahasagarenam vosirami."],
 ["Porsi","Ugae sure porisim pachchakkhami chauvviham pi aaharam-asanam paanam khaimam saimam annatthanabhogenam sahasagarenam, pachchhannakalenam, disamohenam, sahuvayanenam, savvasamahi-vattiyagarenam vosirami."],
 ["Dedh Porsi (Sadh-Porisi)","Ugae sure saadhaporisim pachchakkhami chauvviham pi aaharam-asanam paanam khaimam saimam annatthanabhogenam sahasagarenam, pachchhannakalenam, disamohenam, sahuvayanenam, savvasamahi-vattiyagarenam vosirami."],
