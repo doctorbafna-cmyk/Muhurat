@@ -85,9 +85,11 @@ th{background:#f0f0f0;}
     <button id="calcBtn" onclick="calculate()">Calculate</button>
     <button id="festBtn" onclick="toggleFestivals()">🪔 Festival Calendar</button>
     <button id="vowLangBtn" onclick="toggleVowLang()">Language: हिंदी / Hindi</button>
-    <button id="pachBtn" onclick="togglePachkhan()">🙏 Mangalpath & Pachkhan</button>
+    <button id="mangalBtn" onclick="toggleMangalpath()">🙏 Mangalpath</button>
+    <button id="pachBtn" onclick="togglePachkhan()">🙏 Pachkhan</button>
     <button id="niyamBtn" onclick="toggleNiyam()">📿 14 Niyam</button>
     <div id="festBox"></div>
+    <div id="mangalBox"></div>
     <div id="pachBox"></div>
     <div id="niyamBox"></div>
     <div id="output"></div>
@@ -106,7 +108,8 @@ const T = {
     placeholder:"Enter City Name",
     calcBtn:"Calculate",
     festBtn:"🪔 Festival Calendar",
-    pachBtn:"🙏 Mangalpath & Pachkhan",
+    mangalBtn:"🙏 Mangalpath",
+    pachBtn:"🙏 Pachkhan",
     niyamBtn:"📿 14 Niyam",
     pachTitle:"Pachkhan",
     niyamTitle:"14 Niyam",
@@ -154,7 +157,8 @@ const T = {
     placeholder:"शहर का नाम लिखें",
     calcBtn:"गणना करें",
     festBtn:"🪔 पर्व कैलेंडर",
-    pachBtn:"🙏 मंगलपाठ व पच्चक्खाण",
+    mangalBtn:"🙏 मंगलपाठ",
+    pachBtn:"🙏 पच्चक्खाण",
     niyamBtn:"📿 चौदह नियम",
     pachTitle:"पच्चक्खाण",
     niyamTitle:"चौदह नियम",
@@ -201,9 +205,10 @@ const T = {
 function setLang(lang){
   LANG=lang; localStorage.setItem("muhurat_lang",lang);
   if(window.speechSynthesis) window.speechSynthesis.cancel();
-  const pb=document.getElementById("pachBox"), nb=document.getElementById("niyamBox");
+  const pb=document.getElementById("pachBox"), nb=document.getElementById("niyamBox"), mb=document.getElementById("mangalBox");
   if(pb) pb.style.display="none";
   if(nb) nb.style.display="none";
+  if(mb) mb.style.display="none";
   applyLang();
   document.getElementById("langScreen").style.display="none";
   document.getElementById("app").style.display="block";
@@ -219,6 +224,7 @@ function applyLang(){
   document.getElementById("city").placeholder=t.placeholder;
   document.getElementById("calcBtn").textContent=t.calcBtn;
   document.getElementById("festBtn").innerHTML=t.festBtn;
+  document.getElementById("mangalBtn").innerHTML=t.mangalBtn;
   document.getElementById("pachBtn").innerHTML=t.pachBtn;
   document.getElementById("niyamBtn").innerHTML=t.niyamBtn;
   document.getElementById("status").textContent=t.detecting;
@@ -638,9 +644,10 @@ function toggleVowLang(){
   document.getElementById("vowLangBtn").textContent =
     "Language: " + (VOWLANG==="hi" ? "हिंदी / Hindi" : "English");
   if(window.speechSynthesis) window.speechSynthesis.cancel();
-  const pb=document.getElementById("pachBox"), nb=document.getElementById("niyamBox");
+  const pb=document.getElementById("pachBox"), nb=document.getElementById("niyamBox"), mb=document.getElementById("mangalBox");
   if(pb.style.display==="block") renderPachkhan();
   if(nb.style.display==="block") renderNiyam();
+  if(mb.style.display==="block") renderMangalpath();
 }
 
 document.addEventListener("DOMContentLoaded", function(){
@@ -867,8 +874,47 @@ async function calculate(){
 // ══════════════════════════════════════════════════════════
 // PACHKHAN (verses) — Hindi original, transcribed from Padmodaya
 // ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// MANGALPATH (Chattari Mangalam) — standalone section, own button
+// ══════════════════════════════════════════════════════════
+const MANGALPATH_HI="चत्तारि मंगलं<br>अरिहंता मंगलं<br>सिद्धा मंगलं<br>साहू मंगलं<br>केवलिपण्णत्तो धम्मो मंगलं ॥<br><br>चत्तारि लोगुत्तमा<br>अरिहंता लोगुत्तमा<br>सिद्धा लोगुत्तमा<br>साहू लोगुत्तमा<br>केवलिपण्णत्तो धम्मो लोगुत्तमा ॥<br><br>चत्तारि सरणं पव्वज्जामि<br>अरिहंता सरणं पव्वज्जामि<br>सिद्धा सरणं पव्वज्जामि<br>साहू सरणं पव्वज्जामि<br>केवलिपण्णत्तो धम्मो सरणं पव्वज्जामि ॥<br><br>अरिहंतों का शरणा<br>सिद्धो का शरणा<br>साधुओं का शरणा<br>केवलिप्ररूपित दया धर्म का शरणा<br><br>चार शरणा दुर्गति हरणा और शरणा नहीं कोय<br>जो भवि प्राणी आदरे तो अजर अमर पद होय ॥";
+const MANGALPATH_EN="Chattari mangalam<br>Arihanta mangalam<br>Siddha mangalam<br>Sahu mangalam<br>Kevalipannatto dhammo mangalam.<br><br>Chattari loguttama<br>Arihanta loguttama<br>Siddha loguttama<br>Sahu loguttama<br>Kevalipannatto dhammo loguttama.<br><br>Chattari saranam pavvajjami<br>Arihanta saranam pavvajjami<br>Siddha saranam pavvajjami<br>Sahu saranam pavvajjami<br>Kevalipannatto dhammo saranam pavvajjami.<br><br>Arihanton ka sharana<br>Siddho ka sharana<br>Sadhuon ka sharana<br>Kevali-prarupit daya dharma ka sharana.<br><br>Chaar sharana durgati harana aur sharana nahin koy<br>Jo bhavi prani aadare to ajar amar pad hoy.";
+
+function renderMangalpath(){
+  const text = VOWLANG==="hi" ? MANGALPATH_HI : MANGALPATH_EN;
+  const heading = VOWLANG==="hi" ? "मंगलपाठ" : "Mangalpath";
+  let html = "<h3>"+heading+"</h3>";
+  html += '<div class="vowitem"><p>'+text+'</p>'+
+          '<button type="button" class="playbtn" onclick="speakMangalItem(this)">🔊 '+(VOWLANG==="hi"?"चलाएं":"Play")+'</button></div>';
+  document.getElementById("mangalBox").innerHTML = html;
+}
+
+function speakMangalItem(btn){
+  if(!("speechSynthesis" in window)){
+    alert(VOWLANG==="hi"?"यह ब्राउज़र टेक्स्ट-टू-स्पीच सपोर्ट नहीं करता।":"Sorry, this browser does not support text-to-speech.");
+    return;
+  }
+  if(btn.classList.contains("playing")){
+    window.speechSynthesis.cancel();
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const text = stripHtmlForSpeech(MANGALPATH_HI); // always the Hindi/Prakrit source, for correct pronunciation
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "hi-IN";
+  utter.rate = 0.85;
+
+  document.querySelectorAll(".playbtn").forEach(b=>{b.classList.remove("playing");b.textContent="🔊 "+(VOWLANG==="hi"?"चलाएं":"Play");});
+  btn.classList.add("playing");
+  btn.textContent="⏹ "+(VOWLANG==="hi"?"रोकें":"Stop");
+
+  utter.onend=function(){btn.classList.remove("playing");btn.textContent="🔊 "+(VOWLANG==="hi"?"चलाएं":"Play");};
+  utter.onerror=function(){btn.classList.remove("playing");btn.textContent="🔊 "+(VOWLANG==="hi"?"चलाएं":"Play");};
+
+  window.speechSynthesis.speak(utter);
+}
+
 const PACHKHAN_HI=[
-["मंगलपाठ","चत्तारि मंगलं,<br>अरिहंता मंगलं,<br>सिद्धा मंगलं,<br>साहू मंगलं,<br>केवलिपण्णत्तो धम्मो मंगलं ॥<br><br>चत्तारि लोगुत्तमा,<br>अरिहंता लोगुत्तमा,<br>सिद्धा लोगुत्तमा,<br>साहू लोगुत्तमा,<br>केवलिपण्णत्तो धम्मो लोगुत्तमा ॥<br><br>चत्तारि सरणं पव्वज्जामि,<br>अरिहंता सरणं पव्वज्जामि,<br>सिद्धा सरणं पव्वज्जामि,<br>साहू सरणं पव्वज्जामि,<br>केवलिपण्णत्तो धम्मो सरणं पव्वज्जामि ॥<br><br>अरिहंतों का शरणा,<br>सिद्धो का शरणा,<br>साधुओं का शरणा,<br>केवलिप्ररूपित दया धर्म का शरणा<br><br>चार शरणा, दुर्गति हरणा और शरणा नहीं कोय,<br>जो भवि प्राणी आदरे तो अजर अमर होय ॥"],
 ["नवकारसी","उगए सूरे नमुक्कारसहियं पच्चक्खामि चउव्विहं पि आहारं-असणं पाणं खाइमं साइमं अन्नत्थणाभोगेणं सहसागारेणं वोसिरामि।"],
 ["पोरसी","उगए सूरे पोरिसिं पच्चक्खामि चउव्विहं पि आहारं-असणं पाणं खाइमं साइमं अन्नत्थणाभोगेणं सहसागारेणं, पच्छन्नकालेणं, दिसामोहेणं, साहुवयणेणं, सव्वसमाहि-वत्तियागारेणं वोसिरामि।"],
 ["डेढ़ पोरसी","उगए सूरे साड्ढपोरिसिं पच्चक्खामि चउव्विहं पि आहारं-असणं पाणं खाइमं साइमं अन्नत्थणाभोगेणं सहसागारेणं, पच्छन्नकालेणं, दिसामोहेणं, साहुवयणेणं, सव्वसमाहि-वत्तियागारेणं वोसिरामि।"],
@@ -885,7 +931,6 @@ const PACHKHAN_HI=[
 // PACHKHAN — English (mantra lines given as Roman transliteration so they can
 // still be recited; the two explanatory notes are translated in meaning)
 const PACHKHAN_EN=[
-["Mangalpath","Chattari mangalam,<br>Arihanta mangalam,<br>Siddha mangalam,<br>Sahu mangalam,<br>Kevalipannatto dhammo mangalam.<br><br>Chattari loguttama,<br>Arihanta loguttama,<br>Siddha loguttama,<br>Sahu loguttama,<br>Kevalipannatto dhammo loguttama.<br><br>Chattari saranam pavvajjami,<br>Arihanta saranam pavvajjami,<br>Siddha saranam pavvajjami,<br>Sahu saranam pavvajjami,<br>Kevalipannatto dhammo saranam pavvajjami.<br><br>Arihanton ka sharana,<br>Siddho ka sharana,<br>Sadhuon ka sharana,<br>Kevali-prarupit daya dharma ka sharana.<br><br>Chaar sharana, durgati harana aur sharana nahin koy,<br>Jo bhavi prani aadare to ajar amar hoy."],
 ["Navkarsi","Ugae sure namukkarsahiyam pachchakkhami chauvviham pi aaharam-asanam paanam khaimam saimam annatthanabhogenam sahasagarenam vosirami."],
 ["Porsi","Ugae sure porisim pachchakkhami chauvviham pi aaharam-asanam paanam khaimam saimam annatthanabhogenam sahasagarenam, pachchhannakalenam, disamohenam, sahuvayanenam, savvasamahi-vattiyagarenam vosirami."],
 ["Dedh Porsi (Sadh-Porisi)","Ugae sure saadhaporisim pachchakkhami chauvviham pi aaharam-asanam paanam khaimam saimam annatthanabhogenam sahasagarenam, pachchhannakalenam, disamohenam, sahuvayanenam, savvasamahi-vattiyagarenam vosirami."],
@@ -944,7 +989,15 @@ const NIYAM_EN=[
 // no specific voice is hand-picked, since the browser's own default hi-IN
 // voice is the one that already sounds right.
 function stripHtmlForSpeech(str){
-  return str.replace(/<br\s*\/?>/gi,". ").replace(/<[^>]+>/g,"");
+  let s = str.replace(/<br\s*\/?>/gi,". ").replace(/<[^>]+>/g,"");
+  // Hindi TTS voices often swallow a word-final anusvara (ं), reading
+  // "मंगलं" as "मंगल" and "सरणं" as "सरणा/सरण" instead of "मंगलम"/"सरणम".
+  // For SPEECH ONLY (the displayed spelling is untouched elsewhere),
+  // replace an anusvara that ends a word — followed by a space, danda,
+  // comma, hyphen, or end of string — with a plain म so the voice says
+  // the full "-am" sound. Mid-word anusvara (e.g. संवर) is left alone.
+  s = s.replace(/ं(?=\s|$|[।॥,.\-])/g, "म");
+  return s;
 }
 function speakPachkhanItem(idx, btn){
   if(!("speechSynthesis" in window)){
@@ -997,8 +1050,11 @@ function renderNiyam(){
 function togglePachkhan(){
   const box=document.getElementById("pachBox");
   const niyamBox=document.getElementById("niyamBox");
+  const mangalBox=document.getElementById("mangalBox");
   if(box.style.display==="none"||!box.style.display){
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
     niyamBox.style.display="none";
+    mangalBox.style.display="none";
     renderPachkhan();
     box.style.display="block";
   }else{
@@ -1010,12 +1066,30 @@ function togglePachkhan(){
 function toggleNiyam(){
   const box=document.getElementById("niyamBox");
   const pachBox=document.getElementById("pachBox");
+  const mangalBox=document.getElementById("mangalBox");
   if(box.style.display==="none"||!box.style.display){
     if(window.speechSynthesis) window.speechSynthesis.cancel();
     pachBox.style.display="none";
+    mangalBox.style.display="none";
     renderNiyam();
     box.style.display="block";
   }else{
+    box.style.display="none";
+  }
+}
+
+function toggleMangalpath(){
+  const box=document.getElementById("mangalBox");
+  const pachBox=document.getElementById("pachBox");
+  const niyamBox=document.getElementById("niyamBox");
+  if(box.style.display==="none"||!box.style.display){
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
+    pachBox.style.display="none";
+    niyamBox.style.display="none";
+    renderMangalpath();
+    box.style.display="block";
+  }else{
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
     box.style.display="none";
   }
 }
