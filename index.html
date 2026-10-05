@@ -59,6 +59,9 @@ th{background:#f0f0f0;}
 .playbtn.playing:hover{background:#a5301f;}
 #vowLangBtn{background:#138808;}
 #vowLangBtn:hover{background:#0d6b06;}
+.festAlertBox{margin:8px 0;padding:12px 14px;border-radius:8px;font-size:15px;font-weight:bold;line-height:1.5;}
+.festAlertToday{background:#fff3cd;border:2px solid #ff8c00;color:#7a4a00;}
+.festAlertWeek{background:#e8f5e9;border:2px solid #138808;color:#0d4d12;}
 </style>
 </head>
 <body>
@@ -82,6 +85,7 @@ th{background:#f0f0f0;}
     <input id="city" placeholder="Enter City Name">
     <input id="date" type="date">
     <div id="status">Detecting location...</div>
+    <div id="festAlert"></div>
     <button id="calcBtn" onclick="calculate()">Calculate</button>
     <button id="festBtn" onclick="toggleFestivals()">🪔 Festival Calendar</button>
     <button id="vowLangBtn" onclick="toggleVowLang()">Language: हिंदी / Hindi</button>
@@ -990,12 +994,25 @@ const NIYAM_EN=[
 // voice is the one that already sounds right.
 function stripHtmlForSpeech(str){
   let s = str.replace(/<br\s*\/?>/gi,". ").replace(/<[^>]+>/g,"");
-  // Hindi TTS voices often swallow a word-final anusvara (ं), reading
-  // "मंगलं" as "मंगल" and "सरणं" as "सरणा/सरण" instead of "मंगलम"/"सरणम".
-  // For SPEECH ONLY (the displayed spelling is untouched elsewhere),
-  // replace an anusvara that ends a word — followed by a space, danda,
-  // comma, hyphen, or end of string — with a plain म so the voice says
-  // the full "-am" sound. Mid-word anusvara (e.g. संवर) is left alone.
+  // Hindi TTS voices are unreliable with the anusvara (ं) — the same mark
+  // stands for several different nasal sounds depending on what follows it,
+  // and some voices mis-synthesize or drop a syllable around it entirely
+  // (e.g. "मंगलं" — which has a mid-word anusvara before ग AND a word-final
+  // one — was coming out as "manlam", dropping ग altogether).
+  // FOR SPEECH ONLY (the displayed spelling elsewhere is untouched):
+  // 1) Replace a MID-WORD anusvara with the explicit nasal consonant of the
+  //    following letter's class (the standard, unambiguous Devanagari
+  //    spelling) — ङ् before क-ख-ग-घ, ञ् before च-छ-ज-झ, ण् before ट-ठ-ड-ढ,
+  //    न् before त-थ-द-ध, म् before प-फ-ब-भ. Before य/र/ल/व/श/ष/स/ह the
+  //    anusvara is left as-is, since that's genuinely how it's pronounced.
+  s = s.replace(/ं(?=[कखगघ])/g, "ङ्");
+  s = s.replace(/ं(?=[चछजझ])/g, "ञ्");
+  s = s.replace(/ं(?=[टठडढ])/g, "ण्");
+  s = s.replace(/ं(?=[तथदध])/g, "न्");
+  s = s.replace(/ं(?=[पफबभ])/g, "म्");
+  // 2) A WORD-FINAL anusvara (followed by space/punctuation/end of string)
+  //    becomes a plain म, so "मंगलं"/"सरणं" are spoken in full as
+  //    "mangalam"/"saranam" instead of being cut short.
   s = s.replace(/ं(?=\s|$|[।॥,.\-])/g, "म");
   return s;
 }
@@ -1127,11 +1144,63 @@ function toggleFestivals(){
 }
 
 // ══════════════════════════════════════════════════════════
+// FESTIVAL ALERTS — banner 7 days before, and on the day itself
+// ══════════════════════════════════════════════════════════
+function daysBetween(dateStr1, dateStr2){
+  const d1=new Date(dateStr1+"T00:00:00Z"), d2=new Date(dateStr2+"T00:00:00Z");
+  return Math.round((d2-d1)/86400000);
+}
+
+function checkFestivalAlerts(){
+  const box=document.getElementById("festAlert");
+  if(!box || !LANG) return;
+  const today=getPhoneDateStr();
+  const yr=new Date().getFullYear();
+  const fests=MY_FESTIVALS[yr]||[];
+  const t=T[LANG];
+  let html="";
+  fests.forEach(f=>{
+    const diff=daysBetween(today, f[0]);
+    const name=getFestName(f);
+    if(diff===0){
+      html+='<div class="festAlertBox festAlertToday">🎉 '+(LANG==="hi"?"आज है: ":"Today is: ")+name+'!</div>';
+    }else if(diff===7){
+      const d=new Date(f[0]+"T12:00:00Z");
+      const dateLabel=t.days[d.getUTCDay()]+", "+d.getUTCDate()+" "+t.months[d.getUTCMonth()];
+      html+='<div class="festAlertBox festAlertWeek">🔔 '+name+' '+(LANG==="hi"?"7 दिन बाद है (":"is in 7 days (")+dateLabel+')</div>';
+    }
+  });
+  box.innerHTML=html;
+
+  // Bonus: also try a native browser notification, visible even with the
+  // tab in the background — but note this only fires when the app is
+  // actually opened that day. A static site with no backend server cannot
+  // deliver a true push notification while the app is fully closed.
+  if(html && "Notification" in window){
+    try{
+      if(Notification.permission==="granted"){
+        fests.forEach(f=>{
+          const diff=daysBetween(today, f[0]);
+          if(diff===0 || diff===7){
+            const name=getFestName(f);
+            const body=diff===0 ? (LANG==="hi"?"आज है!":"is today!") : (LANG==="hi"?"7 दिन बाद है":"is in 7 days");
+            new Notification(LANG==="hi"?"पर्व अनुस्मारक":"Festival Reminder", {body:name+" "+body});
+          }
+        });
+      }else if(Notification.permission!=="denied"){
+        Notification.requestPermission();
+      }
+    }catch(e){ /* not supported/blocked — the in-app banner above still shows */ }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
 // AUTO DETECT + INIT
 // ══════════════════════════════════════════════════════════
 function initApp(){
   document.getElementById("date").value=getPhoneDateStr();
   applyLang();
+  checkFestivalAlerts();
   if(!navigator.geolocation){
     gpsLat=13.0827; gpsLon=80.2707;
     document.getElementById("city").value=LANG==="hi"?"चेन्नई":"Chennai";
